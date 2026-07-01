@@ -1,0 +1,4338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Minha Rotina</title>
+  <!-- ══ PWA — Minha Rotina ══ -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <meta name="theme-color" content="#c99286">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Minha Rotina">
+  <meta name="application-name" content="Minha Rotina">
+<style>
+  /* ============================================================
+     Minha Rotina — Design System (redesign mobile-first, 2026)
+     Mantém os nomes de classe usados pelo JS e reestiliza tudo.
+     ============================================================ */
+  :root{
+    /* Marca / fundo quente */
+    --bg:#c99286;
+    --bg-2:#d6a99c;
+    --bg-grad:radial-gradient(125% 85% at 50% -10%, #e0b1a4 0%, #c99286 52%, #b47a6d 100%);
+
+    /* Superfícies (vidro sobre o fundo) */
+    --card:rgba(72,46,42,.5);
+    --card-strong:rgba(56,35,32,.74);
+    --surface:rgba(255,255,255,.09);
+    --surface-2:rgba(255,255,255,.055);
+    --surface-3:rgba(255,255,255,.14);
+    --line:rgba(255,255,255,.14);
+    --line-strong:rgba(255,255,255,.26);
+
+    /* Texto */
+    --txt:#fff7f4;
+    --muted:rgba(255,247,244,.72);
+    --faint:rgba(255,247,244,.5);
+
+    /* Ação primária */
+    --primary:#fff7f4;
+    --primary-ink:#5a3a35;
+
+    /* Status semânticos */
+    --low:#bfe0c8;
+    --med:#f4d59f;
+    --high:#efadad;
+    --ok:#9fd4a8;
+    --ok-ink:#204427;
+    --warn:#f2c98c;
+
+    /* Raio, sombra, foco, motion */
+    --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:24px; --r-pill:999px;
+    --shadow:0 12px 32px rgba(58,28,23,.22);
+    --shadow-sm:0 4px 14px rgba(58,28,23,.16);
+    --shadow-lg:0 22px 54px rgba(38,16,12,.32);
+    --focus:0 0 0 3px rgba(255,247,244,.55);
+    --nav-h:66px;
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    background:var(--bg) var(--bg-grad) fixed;
+    color:var(--txt);
+    min-height:100vh;min-height:100dvh;
+    font-size:16px;line-height:1.45;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3{line-height:1.2;letter-spacing:-.01em}
+  h2{font-size:1.3rem;margin:0 0 4px;font-weight:800}
+  h3{font-size:1rem;font-weight:700}
+  a{color:#ffe3d9}
+  ::selection{background:rgba(255,255,255,.28)}
+
+  /* ---- Campos de formulário ---- */
+  button,input,select,textarea{font:inherit}
+  input,select,textarea{
+    width:100%;padding:12px 14px;border-radius:var(--r-md);
+    border:1px solid var(--line);background:var(--surface);color:var(--txt);
+    transition:border-color .15s var(--ease),background .15s var(--ease),box-shadow .15s var(--ease);
+  }
+  input:hover,select:hover,textarea:hover{border-color:var(--line-strong)}
+  input:focus,select:focus,textarea:focus{
+    outline:none;border-color:transparent;background:rgba(255,255,255,.13);box-shadow:var(--focus);
+  }
+  select option{background:#4a2f2b;color:#fff7f4;padding:8px}
+  input::placeholder,textarea::placeholder{color:var(--faint)}
+  input[type=date],input[type=time]{-webkit-appearance:none;appearance:none}
+  ::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.7);cursor:pointer}
+  textarea{resize:vertical;min-height:64px;border-radius:var(--r-md)}
+  label.field{display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--muted)}
+  label.field>span{font-weight:700;letter-spacing:.01em}
+
+  /* ---- Botões ---- */
+  button{
+    border:0;border-radius:var(--r-pill);padding:11px 16px;min-height:44px;
+    background:var(--surface-3);color:var(--txt);font-weight:500;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    transition:transform .08s var(--ease),background .15s var(--ease),box-shadow .15s var(--ease);
+    -webkit-tap-highlight-color:transparent;
+  }
+  button:hover{background:rgba(255,255,255,.2)}
+  button:active{transform:scale(.97)}
+  button:focus-visible{outline:none;box-shadow:var(--focus)}
+  button.primary{background:var(--primary);color:var(--primary-ink);font-weight:700;box-shadow:var(--shadow-sm)}
+  button.primary:hover{background:#fff}
+  button.danger{background:rgba(231,154,154,.9);color:#3a1414;font-weight:600}
+  button.danger:hover{background:#efadad}
+  button.ghost{background:transparent;border:1px solid var(--line-strong)}
+  button.ghost:hover{background:var(--surface-2)}
+
+  /* ---- Shell do app ---- */
+  .app{
+    max-width:1180px;margin:0 auto;
+    padding:calc(env(safe-area-inset-top,0px) + 14px)
+            max(16px,env(safe-area-inset-right,0px))
+            calc(var(--nav-h) + 30px + env(safe-area-inset-bottom,0px))
+            max(16px,env(safe-area-inset-left,0px));
+  }
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  #welcomeUser{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+  .title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:2px 0 0;display:flex;align-items:center;gap:8px}
+  .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .top-actions button{padding:9px 13px;min-height:40px;font-size:.85rem}
+
+  .layout{display:grid;grid-template-columns:1fr;gap:14px}
+  aside{order:-1}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);
+    box-shadow:var(--shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  }
+  .section{padding:18px}
+  .muted{color:var(--muted)}
+  .small{font-size:.8rem;color:var(--muted)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .between{display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+
+  /* ---- Navegação inferior (ícone + rótulo) ---- */
+  .tabs{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:max(10px,env(safe-area-inset-bottom,10px));
+    width:min(560px,calc(100% - 20px));
+    display:grid;grid-template-columns:repeat(6,1fr);gap:2px;
+    background:rgba(50,31,28,.82);border:1px solid var(--line);
+    border-radius:22px;padding:6px;z-index:30;box-shadow:var(--shadow-lg);
+    backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  }
+  .tab{
+    background:transparent;border-radius:15px;min-height:52px;padding:6px 2px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-size:.6rem;font-weight:700;color:var(--muted);line-height:1;
+    transition:color .15s var(--ease),background .15s var(--ease);
+  }
+  .tab .tab-ico{font-size:1.15rem;line-height:1;transition:transform .18s var(--ease)}
+  .tab .tab-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .tab:hover{color:var(--txt)}
+  .tab.active{background:rgba(255,255,255,.16);color:var(--txt)}
+  .tab.active .tab-ico{transform:translateY(-1px) scale(1.06)}
+
+  /* ---- Views ---- */
+  .view{display:none;animation:viewIn .25s var(--ease)}
+  .view.active{display:block}
+  @keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---- Listas & itens ---- */
+  .list{display:grid;gap:12px}
+  .item{
+    padding:14px;border-radius:var(--r-lg);background:var(--surface-2);
+    border:1px solid var(--line);transition:background .15s var(--ease),border-color .15s var(--ease);
+  }
+  .item.archived{opacity:.62}
+  .item strong{font-weight:700}
+  .prio-low{box-shadow:inset 4px 0 0 var(--low)}
+  .prio-medium{box-shadow:inset 4px 0 0 var(--med)}
+  .prio-high{box-shadow:inset 4px 0 0 var(--high)}
+
+  /* estados das rotinas/atividades */
+  .task.done strong,.task.missed strong,.task.canceled strong{text-decoration:line-through}
+  .task.done{opacity:.8;position:relative}
+  .task.done::after{
+    content:'✓';position:absolute;top:12px;right:12px;width:26px;height:26px;
+    border-radius:var(--r-pill);background:linear-gradient(135deg,#9fd4a8,#7ab983);
+    color:var(--ok-ink);font-weight:900;font-size:.95rem;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(159,212,168,.4);
+  }
+  .task.done strong{color:rgba(255,247,244,.72)}
+  .task.missed{opacity:.6;background:rgba(0,0,0,.16)}
+  .task.canceled{opacity:.48;background:rgba(0,0,0,.22);filter:grayscale(.4)}
+
+  /* radios de status como chips */
+  .item label:has(input[type=radio]){
+    display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:var(--r-pill);
+    background:var(--surface);border:1px solid transparent;font-size:.82rem;cursor:pointer;
+    user-select:none;transition:background .15s var(--ease);
+  }
+  .item label:has(input[type=radio]:checked){background:rgba(255,255,255,.24);font-weight:700;border-color:var(--line-strong)}
+  .item input[type=radio]{width:auto;margin:0;accent-color:#fff}
+
+  /* labels & badges */
+  .label{display:inline-flex;align-items:center;padding:6px 11px;border-radius:var(--r-pill);background:var(--surface-3);font-size:.75rem;font-weight:600;white-space:nowrap}
+  .label.done{background:rgba(159,212,168,.32)}
+  .label.cat{background:var(--surface);font-size:.7rem}
+  .pbad{padding:5px 11px;border-radius:var(--r-pill);font-size:.72rem;font-weight:700;text-transform:capitalize;white-space:nowrap}
+  .p-low{background:rgba(191,224,200,.22);color:#dff2e4}
+  .p-med,.p-medium{background:rgba(244,213,159,.22);color:#f7e6c4}
+  .p-high{background:rgba(239,173,173,.24);color:#ffdada}
+
+  .iconbtn{min-width:38px;min-height:38px;padding:8px;border-radius:12px;background:var(--surface);font-size:.9rem}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+  .actions button{padding:8px 14px;min-height:40px;font-size:.82rem}
+  .miniInput{max-width:110px}
+
+  /* barra de progresso */
+  .bar{height:12px;border-radius:var(--r-pill);background:rgba(0,0,0,.18);overflow:hidden}
+  .fill{height:100%;border-radius:var(--r-pill);background:linear-gradient(90deg,rgba(255,255,255,.6),#fff);transition:width .5s var(--ease)}
+  .fill.full{background:linear-gradient(90deg,#9fd4a8,#cdebd1)}
+  .fill.failed{background:linear-gradient(90deg,#e79a9a,#f0c5c5)}
+
+  /* ---- Calendário / Semana ---- */
+  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .cal-header{text-align:center;padding:4px 0;font-size:.7rem;font-weight:700;color:var(--muted)}
+  .day{
+    min-height:64px;padding:7px 6px;border-radius:12px;background:var(--surface-2);
+    border:1px solid var(--line);cursor:pointer;overflow:hidden;
+    transition:background .15s var(--ease),transform .08s var(--ease);
+  }
+  .day:hover{background:var(--surface)}
+  .day:active{transform:scale(.97)}
+  .day.other{opacity:.4}
+  .day.today{outline:2px solid rgba(255,255,255,.6);outline-offset:-2px}
+  .week-grid{display:grid;grid-template-columns:1fr;gap:10px}
+  .week-day{padding:14px;border-radius:var(--r-lg);background:var(--surface-2);border:1px solid var(--line)}
+  .week-col{display:grid;gap:8px}
+  .week-col>div{padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.1);font-size:.82rem;line-height:1.5}
+
+  /* ---- Relatório ---- */
+  .status-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;padding:10px;border-radius:14px;background:var(--surface-2)}
+  .status-row label{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:var(--r-pill);background:var(--surface);font-size:.85rem;cursor:pointer}
+  .status-row label:has(input:checked){background:rgba(255,255,255,.24);font-weight:700}
+  .item.outcome-done{box-shadow:inset 4px 0 0 var(--ok);opacity:.75;background:rgba(0,0,0,.1)}
+  .item.outcome-done strong{text-decoration:line-through;color:rgba(255,247,244,.65)}
+  .item.outcome-failed{box-shadow:inset 4px 0 0 var(--high);opacity:.62;background:rgba(0,0,0,.16);filter:grayscale(.25)}
+  .item.outcome-failed strong{text-decoration:line-through;color:rgba(255,247,244,.6)}
+  .item.outcome-canceled{opacity:.48;background:rgba(0,0,0,.2);filter:grayscale(.5)}
+  .item.outcome-canceled strong{text-decoration:line-through;color:rgba(255,247,244,.5)}
+  .item.overdue{border-color:rgba(242,201,140,.6);background:rgba(242,201,140,.1)}
+  .item.at-risk{border-color:rgba(247,200,150,.55)}
+  .overdue-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-pill);background:rgba(242,201,140,.25);color:#f7d9a8;font-size:.72rem;font-weight:700;margin-left:6px}
+  .risk-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r-pill);background:rgba(247,200,150,.2);color:#f7c887;font-size:.72rem;font-weight:700}
+  .fail-reason{margin-top:8px;padding:10px;border-radius:12px;background:rgba(231,154,154,.14);font-size:.85rem}
+  .fail-reason strong{color:#f7c4c4}
+  .edit-form{margin-top:10px;padding:14px;border-radius:14px;background:var(--surface-2);border:1px dashed var(--line-strong);display:grid;gap:10px}
+  .edit-form .row{flex-wrap:wrap}
+  .edit-form input{padding:10px 12px;border-radius:12px}
+  .month-head{display:flex;align-items:center;gap:10px;margin:20px 0 4px;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);flex-wrap:wrap}
+  .month-head:first-child{margin-top:2px}
+  .month-head h3{margin:0;font-size:1rem}
+  .month-head .count{font-size:.78rem;color:var(--muted)}
+  .item[data-cat]{position:relative;padding-left:18px}
+  .item[data-cat]::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:5px;border-radius:8px;background:var(--cat-color,rgba(255,255,255,.2))}
+  .filters{display:flex;gap:8px;margin:10px 0 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .filters::-webkit-scrollbar{display:none}
+  .filter-chip{padding:9px 15px;border-radius:var(--r-pill);font-size:.83rem;font-weight:600;background:var(--surface);cursor:pointer;border:1px solid var(--line);white-space:nowrap;flex-shrink:0}
+  .filter-chip:hover{background:var(--surface-3)}
+  .filter-chip.active{background:var(--primary);color:var(--primary-ink);border-color:transparent}
+
+  /* edição de horário inline */
+  .time-edit{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:10px;border-radius:12px;background:var(--surface-2)}
+  .time-edit input[type=time]{width:auto;flex:1;min-width:110px}
+
+  /* timeline / snapshot / backup */
+  .timeline{margin-top:10px;padding:10px;border-radius:12px;background:rgba(0,0,0,.12);max-height:240px;overflow-y:auto}
+  .timeline-item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 8px;border-radius:8px;font-size:.82rem}
+  .timeline-item:hover{background:var(--surface-2)}
+  .timeline-item .date{color:var(--muted);min-width:88px;font-variant-numeric:tabular-nums}
+  .timeline-item .src{font-size:.7rem;opacity:.7}
+  .timeline-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:10px}
+  .backup-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .backup-row button{flex:1;min-width:90px}
+  .snapshot-current{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding:12px;border-radius:12px;background:var(--surface-2)}
+  .snapshot-current .val{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+  .snapshot-current .delta{font-size:.85rem;color:var(--muted)}
+
+  /* ---- Chips do Widget (resumo do dia) ---- */
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-pill);font-size:.85rem;font-weight:700;font-variant-numeric:tabular-nums}
+  .c-done{background:rgba(159,212,168,.28);color:#d6f2db}
+  .c-missed{background:rgba(231,154,154,.26);color:#ffdada}
+  .c-pending{background:rgba(244,213,159,.24);color:#f7e6c4}
+
+  /* ---- Login ---- */
+  .login-wrap{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px max(18px,env(safe-area-inset-left,0px)) 24px max(18px,env(safe-area-inset-right,0px))}
+  .login-card{width:100%;max-width:400px;padding:28px 24px;background:var(--card-strong);border-radius:26px;border:1px solid var(--line);box-shadow:var(--shadow-lg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+  .login-card .small{text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:.72rem}
+  .login-card h1{margin:6px 0 6px;font-size:1.9rem;font-weight:800;letter-spacing:-.02em}
+  .login-card p{margin:0 0 20px;color:var(--muted);font-size:.9rem;line-height:1.5}
+  .login-card input{margin-bottom:12px}
+  .login-error{padding:11px 13px;border-radius:12px;margin-bottom:12px;background:rgba(231,154,154,.2);color:#ffd5d5;font-size:.85rem;border:1px solid rgba(231,154,154,.4)}
+  .login-links{display:flex;justify-content:space-between;gap:8px;margin-top:14px;flex-wrap:wrap}
+  button.link{background:transparent;color:var(--muted);padding:8px 6px;min-height:auto;text-decoration:underline;font-size:.85rem;border-radius:6px;font-weight:500}
+  button.link:hover{background:var(--surface-2);color:var(--txt)}
+  .users-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .user-chip{padding:9px 14px;border-radius:var(--r-pill);background:var(--surface-3);cursor:pointer;font-size:.85rem;border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center}
+  .user-chip:hover{background:rgba(255,255,255,.22)}
+  .user-chip .x{opacity:.6}
+  .user-chip .x:hover{opacity:1;color:#ffd5d5}
+
+  /* ---- Toast ---- */
+  .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(10px);bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom,0px));background:rgba(38,22,19,.96);color:#fff;padding:13px 18px;border-radius:14px;border:1px solid var(--line);z-index:60;box-shadow:var(--shadow-lg);max-width:calc(100% - 32px);font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .22s var(--ease),transform .22s var(--ease)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---- Indicador de sincronização ---- */
+  .sync-dot{display:inline-block;width:9px;height:9px;border-radius:var(--r-pill);vertical-align:middle;flex-shrink:0;transition:background .3s}
+  .sync-ok{background:#9fd4a8}
+  .sync-syncing{background:#f7d087;animation:pulse .8s infinite alternate}
+  .sync-error{background:#e79a9a}
+  .sync-offline{background:rgba(255,255,255,.25)}
+  .sync-none{background:rgba(255,255,255,.18)}
+  @keyframes pulse{to{opacity:.3}}
+
+  /* ---- Painel de sincronização (Supabase) ---- */
+  .setup-panel{margin-top:14px;padding:16px;border-radius:18px;background:var(--surface-2);border:1px solid var(--line)}
+  .setup-panel h3{margin:0 0 8px;font-size:.95rem}
+  .setup-sql{margin:8px 0;padding:11px 12px;border-radius:10px;background:rgba(0,0,0,.35);font-size:.68rem;font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;color:#c6eedd;overflow-x:auto;max-height:120px;overflow-y:auto;cursor:pointer}
+  .step-list{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+  .step-list li{display:flex;gap:8px;align-items:flex-start;font-size:.82rem;line-height:1.4}
+  .step-num{width:20px;height:20px;border-radius:var(--r-pill);flex-shrink:0;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;margin-top:1px}
+  .conn-ok{color:#9fd4a8;font-size:.82rem;margin-top:6px}
+  .conn-err{color:#f7c4c4;font-size:.82rem;margin-top:6px}
+
+  /* ---- Responsivo (telas maiores) ---- */
+  @media(min-width:600px){
+    .week-grid{grid-template-columns:repeat(7,1fr)}
+    .week-day{min-height:230px}
+    .day{min-height:98px;padding:10px}
+    .calendar{gap:8px}
+  }
+  @media(min-width:760px){
+    .app{padding-top:calc(env(safe-area-inset-top,0px) + 20px)}
+    .title{font-size:1.8rem}
+    body.tab-plan .layout{grid-template-columns:340px 1fr}
+    body.tab-plan aside{order:0}
+    .tabs{width:min(680px,calc(100% - 24px))}
+    .section{padding:22px}
+  }
+  @media(min-width:1024px){ .tabs{width:720px} }
+  body:not(.tab-plan) aside{display:none}
+
+  /* Telas muito estreitas */
+  @media(max-width:360px){
+    .tab .tab-lbl{font-size:.54rem}
+    .tab .tab-ico{font-size:1.05rem}
+    .day{min-height:56px}
+    .title{font-size:1.35rem}
+  }
+  @media(max-width:640px){ #seed{display:none} }
+
+  /* Status row com scroll horizontal no celular */
+  @media(max-width:600px){
+    .status-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .status-row::-webkit-scrollbar{display:none}
+    .status-row label{flex-shrink:0;white-space:nowrap}
+  }
+
+  /* Respeita quem prefere menos movimento */
+  @media(prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+    html{scroll-behavior:auto}
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <div class="small">Organizador pessoal</div>
+    <h1>Minha Rotina</h1>
+    <p id="loginIntro">Entre com seu usuário e senha. Os dados ficam salvos no seu próprio dispositivo, separados por conta.</p>
+
+    <!-- Aba Login (default) -->
+    <div id="loginPanel">
+      <input id="loginUser" placeholder="Nome de usuário" autocomplete="username">
+      <input id="loginPass" type="password" placeholder="Senha" autocomplete="current-password">
+      <div id="loginError" class="login-error" style="display:none"></div>
+      <button id="loginBtn" class="primary" style="width:100%">Entrar</button>
+      <div class="login-links">
+        <button class="link" id="goSignup">Criar conta</button>
+        <button class="link" id="goReset">Esqueci a senha</button>
+      </div>
+    </div>
+
+    <!-- Aba Cadastro -->
+    <div id="signupPanel" style="display:none">
+      <input id="signupUser" placeholder="Escolha um nome de usuário" autocomplete="username">
+      <input id="signupEmail" type="email" placeholder="E-mail (para recuperação de senha)" autocomplete="email">
+      <input id="signupPass" type="password" placeholder="Senha (mínimo 8 caracteres)" autocomplete="new-password">
+      <input id="signupPass2" type="password" placeholder="Confirme a senha" autocomplete="new-password">
+      <div id="signupError" class="login-error" style="display:none"></div>
+      <button id="signupBtn" class="primary" style="width:100%">Criar conta e entrar</button>
+      <div class="login-links">
+        <button class="link" id="backToLogin">Já tenho conta</button>
+      </div>
+    </div>
+
+    <!-- Aba Reset (recuperação por email) -->
+    <div id="resetPanel" style="display:none">
+      <p class="small" style="line-height:1.5">
+        Informe seu usuário e o e-mail cadastrado. Se conferirem, você poderá definir uma nova senha.
+      </p>
+      <input id="resetUser" placeholder="Nome de usuário" autocomplete="username">
+      <input id="resetEmail" type="email" placeholder="E-mail cadastrado" autocomplete="email">
+      <input id="resetNewPass" type="password" placeholder="Nova senha (mínimo 8 caracteres)" autocomplete="new-password">
+      <input id="resetNewPass2" type="password" placeholder="Confirme a nova senha" autocomplete="new-password">
+      <div id="resetError" class="login-error" style="display:none"></div>
+      <button id="resetBtn" class="primary" style="width:100%">Redefinir senha</button>
+      <div class="login-links">
+        <button class="link" id="backToLogin2">Voltar</button>
+        <button class="link" id="goDeleteAcc" style="color:#e7aaaa">Apagar conta</button>
+      </div>
+    </div>
+
+    <!-- Aba Apagar conta -->
+    <div id="deletePanel" style="display:none">
+      <p class="small" style="color:#f7c887;line-height:1.5">
+        ⚠ Apagar removerá <strong>permanentemente</strong> a conta e todos os seus dados deste dispositivo.
+      </p>
+      <input id="delUser" placeholder="Nome de usuário a apagar" autocomplete="off">
+      <input id="delConfirm" placeholder='Digite "APAGAR" para confirmar' autocomplete="off">
+      <div id="delError" class="login-error" style="display:none"></div>
+      <button id="delBtn" class="danger" style="width:100%">Apagar conta</button>
+      <div class="login-links">
+        <button class="link" id="backToLogin3">Voltar</button>
+      </div>
+    </div>
+
+    <!-- Painel de configuração do Supabase (sincronização) -->
+    <div class="setup-panel" id="supaSetupPanel" style="display:none">
+      <h3>☁ Sincronização entre dispositivos</h3>
+      <ul class="step-list">
+        <li><span class="step-num">1</span><span>Acesse <a href="https://supabase.com" target="_blank" style="color:#c8dce8">supabase.com</a>, crie conta gratuita e um novo projeto.</span></li>
+        <li><span class="step-num">2</span><span>No projeto, vá em <strong>SQL Editor</strong> e execute o SQL abaixo (clique para copiar):</span></li>
+      </ul>
+      <div class="setup-sql" id="setupSql" onclick="copySetupSql()" title="Clique para copiar">create table if not exists rt_users (
+  username text primary key,
+  salt text not null,
+  hash text not null,
+  created_at timestamptz default now()
+);
+create table if not exists rt_states (
+  username text primary key,
+  state_json jsonb not null default '{}',
+  updated_at timestamptz default now()
+);
+alter table rt_users enable row level security;
+alter table rt_states enable row level security;
+create policy "allow_all" on rt_users
+  for all using (true) with check (true);
+create policy "allow_all" on rt_states
+  for all using (true) with check (true);</div>
+      <ul class="step-list">
+        <li><span class="step-num">3</span><span>Vá em <strong>Settings → API</strong> e copie a <em>Project URL</em> e a <em>anon key</em>.</span></li>
+        <li><span class="step-num">4</span><span>Cole abaixo e clique em Testar:</span></li>
+      </ul>
+      <input id="supaUrl" placeholder="Project URL (https://xxxx.supabase.co)" autocomplete="off" style="margin-bottom:8px">
+      <input id="supaKey" placeholder="anon key (eyJ…)" autocomplete="off" style="margin-bottom:8px">
+      <div id="supaConnResult"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="supaTestBtn" class="ghost" style="flex:1">Testar conexão</button>
+        <button id="supaSaveBtn" class="primary" style="flex:1" disabled>Salvar e ativar</button>
+      </div>
+      <div class="login-links">
+        <button class="link" id="supaDisableBtn" style="display:none">Desativar sincronização</button>
+        <button class="link" id="supaCloseBtn">Fechar</button>
+      </div>
+    </div>
+
+    <div class="login-links" style="margin-top:16px;border-top:1px solid var(--line);padding-top:12px">
+      <button class="link" id="goSupaSetup">☁ Configurar sincronização entre dispositivos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="appScreen" class="app" style="display:none">
+  <div class="top">
+    <div>
+      <div class="small" id="welcomeUser">Organizador pessoal</div>
+      <div class="title">Minha Rotina <span id="syncDot" class="sync-dot sync-none" title="Sincronização não configurada"></span></div>
+    </div>
+    <div class="top-actions">
+      <button id="seed" class="ghost">Carregar demo</button>
+      <button id="syncNowBtn" class="ghost" title="Sincronizar agora">☁ Sync</button>
+      <button id="installBtn" onclick="triggerInstall()" class="primary" style="display:none;gap:6px;align-items:center">
+        📲 Instalar app
+      </button>
+      <button id="settingsBtn" class="ghost" title="Configurações">⚙ Configurações</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- ===== Sidebar ===== -->
+    <aside class="card section">
+      <h2>Resumo do mês</h2>
+      <div class="grid2">
+        <div class="item"><div class="small">Metas ativas</div><div id="mGoals" style="font-size:1.7rem;font-weight:700">0</div></div>
+        <div class="item"><div class="small">Dias com registros</div><div id="mDays" style="font-size:1.7rem;font-weight:700">0</div></div>
+        <div class="item"><div class="small">Eventos no mês</div><div id="mEvents" style="font-size:1.7rem;font-weight:700">0</div></div>
+        <div class="item"><div class="small">Progresso médio</div><div id="mProgress" style="font-size:1.7rem;font-weight:700">0%</div></div>
+      </div>
+      <div class="item" style="margin-top:10px">
+        <h3 style="margin:0 0 6px">Controle de presença</h3>
+        <div class="small">Rotinas recorrentes usam: feita, não fiz, cancelada e pendente.</div>
+      </div>
+    </aside>
+
+    <!-- ===== Main views ===== -->
+    <main>
+
+      <section class="card section view active" id="view-plan">
+        <h2>Planejamento</h2>
+        <p class="muted">Metas macro, eventos e rotinas recorrentes.</p>
+
+        <div class="item">
+          <h3 style="margin:0 0 6px">Nova meta macro</h3>
+          <div class="row">
+            <input id="goalName" placeholder="Ex.: Ler 400 páginas">
+            <select id="goalType">
+              <option value="count">Quantidade</option>
+              <option value="pages">Páginas</option>
+              <option value="tasks">Tarefa</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <input id="goalTarget" type="number" placeholder="Meta">
+            <input id="goalUnit" placeholder="Unidade">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <select id="goalMonth">
+              <option value="">Mês (opcional)</option>
+              <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+              <option>Abril</option><option>Maio</option><option>Junho</option>
+              <option>Julho</option><option>Agosto</option><option>Setembro</option>
+              <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+            </select>
+            <input id="goalYear" type="number" placeholder="Ano" style="max-width:100px">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <input id="goalDeadline" type="date" placeholder="Data de vencimento" style="flex:1">
+            <span class="small" style="opacity:.6;align-self:center">📅 Data exata (substitui mês/ano)</span>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <select id="goalEntryMode">
+              <option value="sum">Acumular (soma os lançamentos)</option>
+              <option value="snapshot">Valor atual (peso, medidas — substitui)</option>
+            </select>
+          </div>
+          <div class="row" id="snapshotStartRow" style="margin-top:8px;display:none">
+            <input id="goalStartValue" type="number" placeholder="Valor inicial (ex.: peso atual)">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="addGoal" class="primary">Adicionar meta</button>
+          </div>
+        </div>
+
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 6px">▶ Evento com data</h3>
+          <div class="row">
+            <input id="eventTitle" placeholder="Ex.: Viagem para RN">
+            <input id="eventDate" type="date">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <input id="eventTime" type="time" placeholder="Início">
+            <input id="eventEndTime" type="time" placeholder="Término">
+            <select id="eventPriority">
+              <option value="low">Prioridade baixa</option>
+              <option value="medium" selected>Prioridade média</option>
+              <option value="high">Prioridade alta</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="addEvent" class="primary">Adicionar ao calendário</button>
+          </div>
+        </div>
+
+        <div class="item" style="margin-top:12px;border-left:4px solid rgba(242,210,156,.6)">
+          <h3 style="margin:0 0 6px">✦ Atividade única</h3>
+          <p class="small" style="margin:0 0 10px;color:rgba(255,247,244,.65)">Tarefa específica de um dia — não se repete. Você pode acompanhar conclusão.</p>
+          <div class="row">
+            <input id="taskTitle" placeholder="Ex.: Fazer compras">
+            <input id="taskDate" type="date">
+          </div>
+          <div class="row" style="margin-top:8px">
+            <input id="taskTime" type="time" placeholder="Início">
+            <input id="taskEndTime" type="time" placeholder="Término">
+            <select id="taskPriority">
+              <option value="low">Prioridade baixa</option>
+              <option value="medium" selected>Prioridade média</option>
+              <option value="high">Prioridade alta</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="addTask" class="primary">Adicionar atividade</button>
+          </div>
+        </div>
+
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 6px">↻ Rotina recorrente</h3>
+          <input id="recTitle" placeholder="Ex.: Aula do mestrado" style="margin-bottom:8px">
+          <div class="row">
+            <input id="recStart" type="time">
+            <input id="recEnd" type="time">
+            <select id="recGoal"><option value="">Vincular à meta macro</option></select>
+            <select id="recPriority">
+              <option value="low">Prioridade baixa</option>
+              <option value="medium" selected>Prioridade média</option>
+              <option value="high">Prioridade alta</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <span class="small">Dias:</span>
+            <label class="small"><input type="checkbox" class="rec-day" value="1" checked> Seg</label>
+            <label class="small"><input type="checkbox" class="rec-day" value="2" checked> Ter</label>
+            <label class="small"><input type="checkbox" class="rec-day" value="3" checked> Qua</label>
+            <label class="small"><input type="checkbox" class="rec-day" value="4" checked> Qui</label>
+            <label class="small"><input type="checkbox" class="rec-day" value="5" checked> Sex</label>
+            <label class="small"><input type="checkbox" class="rec-day" value="6"> Sáb</label>
+            <label class="small"><input type="checkbox" class="rec-day" value="0"> Dom</label>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="addRec" class="primary">Adicionar rotina</button>
+          </div>
+        </div>
+
+        <div class="list" id="planList" style="margin-top:12px"></div>
+      </section>
+
+      <section class="card section view" id="view-today">
+        <h2>Hoje</h2>
+        <p class="muted">Rotinas recorrentes, eventos e atividades únicas do dia. Metas macro não aparecem aqui.</p>
+        <div style="display:flex;align-items:center;gap:8px;margin:10px 0 14px;flex-wrap:wrap">
+          <button id="todayPrev" class="ghost" style="padding:8px 12px;font-size:.85rem">◀</button>
+          <input id="todayDate" type="date" style="max-width:180px">
+          <button id="todayNow" class="ghost" style="padding:8px 12px;font-size:.85rem">Hoje</button>
+          <button id="todayNext" class="ghost" style="padding:8px 12px;font-size:.85rem">▶</button>
+          <span id="todayDow" class="small" style="opacity:.75;font-style:italic"></span>
+        </div>
+        <div class="list" id="todayList"></div>
+      </section>
+
+      <section class="card section view" id="view-week">
+        <h2>Semana</h2>
+        <p class="muted">Visão da semana dividida em manhã, tarde e noite.</p>
+        <div class="row" style="justify-content:space-between;margin:10px 0 12px">
+          <button id="prevWeek">◀</button>
+          <div id="weekTitle" class="label"></div>
+          <button id="nextWeek">▶</button>
+        </div>
+        <div class="week-grid" id="weekList"></div>
+      </section>
+
+      <section class="card section view" id="view-month">
+        <h2>Mês</h2>
+        <div class="row" style="justify-content:space-between">
+          <button id="prevMonth">◀</button>
+          <div id="monthTitle" class="label"></div>
+          <button id="nextMonth">▶</button>
+        </div>
+        <div class="calendar" id="calendar" style="margin-top:12px"></div>
+      </section>
+
+      <section class="card section view" id="view-report">
+        <h2>Relatório</h2>
+        <p class="muted">Progresso consolidado por meta. Atualiza automaticamente quando você marca rotinas como "Feita" ou registra progresso manual.</p>
+        <div class="filters" id="reportFilters">
+          <button class="filter-chip active" data-filter="all">Todas</button>
+          <button class="filter-chip" data-filter="active">Em andamento</button>
+          <button class="filter-chip" data-filter="overdue">Vencidas</button>
+          <button class="filter-chip" data-filter="at-risk">Próximas do prazo</button>
+          <button class="filter-chip" data-filter="done">Concluídas</button>
+          <button class="filter-chip" data-filter="failed">Não feitas</button>
+        </div>
+        <div class="list" id="reportList" style="margin-top:12px"></div>
+      </section>
+
+      <section class="card section view" id="view-settings">
+        <h2>⚙ Configurações</h2>
+        <p class="muted">Informações da conta, backup e gerenciamento.</p>
+
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 10px">Conta</h3>
+          <div class="grid2" style="gap:10px">
+            <div>
+              <div class="small">Usuário</div>
+              <div id="setUser" style="font-size:1.1rem;font-weight:700;margin-top:2px">—</div>
+            </div>
+            <div>
+              <div class="small">Conta criada em</div>
+              <div id="setCreated" style="font-size:.95rem;margin-top:2px">—</div>
+            </div>
+            <div>
+              <div class="small">Último backup</div>
+              <div id="setLastBackup" style="font-size:.95rem;margin-top:2px">—</div>
+            </div>
+            <div>
+              <div class="small">Sincronização</div>
+              <div id="setSyncStatus" style="font-size:.95rem;margin-top:2px">—</div>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="small">E-mail (para recuperação de senha)</div>
+            <div class="row" style="margin-top:4px">
+              <input id="setEmail" type="email" placeholder="seu@email.com" style="flex:1">
+              <button id="setEmailSaveBtn" class="primary">Salvar e-mail</button>
+            </div>
+          </div>
+          <div class="row" style="margin-top:14px;justify-content:space-between;align-items:center">
+            <button id="setChangePassBtn" class="ghost">🔒 Trocar senha</button>
+            <button id="setLogoutBtn" class="ghost" style="color:rgba(255,200,180,.8);border-color:rgba(255,200,180,.25)">Sair da conta</button>
+          </div>
+        </div>
+
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 6px">📤 Exportar todos os dados</h3>
+          <p class="small" style="margin:0 0 10px">Baixe um arquivo JSON com todas as suas metas, rotinas, eventos, atividades e registros. Guarde em local seguro para usar como backup.</p>
+          <div id="setBackupStatus" class="small" style="margin-bottom:10px">—</div>
+          <div class="row">
+            <button id="setExportBtn" class="primary">⬇ Baixar JSON</button>
+            <button id="setShareBtn" class="ghost">📤 Compartilhar</button>
+            <button id="setCopyBtn" class="ghost">📋 Copiar</button>
+          </div>
+        </div>
+
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 6px">📥 Importar dados</h3>
+          <p class="small" style="margin:0 0 10px"><strong style="color:#f7c887">Atenção:</strong> ao importar, todos os dados atuais desta conta serão substituídos pelos do arquivo. Faça um backup antes.</p>
+          <div class="row">
+            <input id="setImportFile" type="file" accept="application/json,.json" style="display:none">
+            <button id="setImportBtn" class="ghost">📂 Escolher arquivo JSON</button>
+          </div>
+          <div id="setImportName" class="small" style="margin-top:6px"></div>
+        </div>
+
+        <div class="item" style="margin-top:12px;background:rgba(231,170,170,.12);border-color:rgba(231,170,170,.3)">
+          <h3 style="margin:0 0 6px;color:#f0c5c5">⚠ Zona de perigo</h3>
+          <p class="small" style="margin:0 0 10px">Apagar a conta remove permanentemente todos os dados deste usuário no dispositivo. Faça backup antes.</p>
+          <button id="setDeleteAccBtn" class="danger">Apagar conta deste dispositivo</button>
+        </div>
+      </section>
+
+      <section class="card section view" id="view-widget">
+        <h2>📱 Widget Hoje</h2>
+        <p class="muted">Visualização rápida das atividades do dia.</p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <div>
+              <div class="small">Data</div>
+              <input id="widgetDate" type="date" style="max-width:200px">
+            </div>
+            <button id="widgetAddToHome" class="primary" style="padding:8px 12px;font-size:.8rem;white-space:nowrap">📌 Atalho</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+            <div style="display:flex;gap:6px">
+              <button id="widgetPrev" class="ghost" style="padding:8px 12px;font-size:.8rem">◀</button>
+              <button id="widgetToday" class="ghost" style="padding:8px 12px;font-size:.8rem">Hoje</button>
+              <button id="widgetNext" class="ghost" style="padding:8px 12px;font-size:.8rem">▶</button>
+            </div>
+          </div>
+          <div id="widgetSummary" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:rgba(255,255,255,.05);border-radius:14px">
+            <button id="widgetAddTask" class="ghost" style="flex:1;font-size:.82rem">✦ Atividade</button>
+            <button id="widgetAddEvent" class="ghost" style="flex:1;font-size:.82rem">▶ Evento</button>
+            <button id="widgetAddRec" class="ghost" style="flex:1;font-size:.82rem">↻ Rotina</button>
+          </div>
+
+          <!-- Formulário inline: Atividade -->
+          <div id="widgetFormTask" style="display:none;flex-direction:column;gap:8px;padding:14px;background:rgba(255,255,255,.06);border-radius:14px;border:1px solid var(--line)">
+            <strong class="small">✦ Nova atividade única</strong>
+            <input id="wfTaskTitle" placeholder="Título da atividade">
+            <div class="row" style="gap:8px">
+              <input id="wfTaskTime" type="time" style="flex:1" title="Início">
+              <input id="wfTaskEndTime" type="time" style="flex:1" title="Término">
+              <select id="wfTaskPriority" style="flex:1">
+                <option value="low">Baixa</option>
+                <option value="medium" selected>Média</option>
+                <option value="high">Alta</option>
+              </select>
+            </div>
+            <div class="row" style="gap:8px">
+              <button id="wfTaskSave" class="primary" style="flex:1">Adicionar</button>
+              <button id="wfTaskCancel" class="ghost" style="flex:1">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Formulário inline: Evento -->
+          <div id="widgetFormEvent" style="display:none;flex-direction:column;gap:8px;padding:14px;background:rgba(255,255,255,.06);border-radius:14px;border:1px solid var(--line)">
+            <strong class="small">▶ Novo evento</strong>
+            <input id="wfEventTitle" placeholder="Título do evento">
+            <div class="row" style="gap:8px">
+              <input id="wfEventDate" type="date" style="flex:1">
+              <input id="wfEventTime" type="time" style="flex:1" title="Início">
+              <input id="wfEventEndTime" type="time" style="flex:1" title="Término">
+            </div>
+            <select id="wfEventPriority">
+              <option value="low">Prioridade baixa</option>
+              <option value="medium" selected>Prioridade média</option>
+              <option value="high">Prioridade alta</option>
+            </select>
+            <div class="row" style="gap:8px">
+              <button id="wfEventSave" class="primary" style="flex:1">Adicionar</button>
+              <button id="wfEventCancel" class="ghost" style="flex:1">Cancelar</button>
+            </div>
+          </div>
+
+          <!-- Formulário inline: Rotina -->
+          <div id="widgetFormRec" style="display:none;flex-direction:column;gap:8px;padding:14px;background:rgba(255,255,255,.06);border-radius:14px;border:1px solid var(--line)">
+            <strong class="small">↻ Nova rotina recorrente</strong>
+            <input id="wfRecTitle" placeholder="Título da rotina">
+            <div class="row" style="gap:8px">
+              <input id="wfRecStart" type="time" style="flex:1" placeholder="Início">
+              <input id="wfRecEnd" type="time" style="flex:1" placeholder="Fim">
+            </div>
+            <div class="row" style="gap:6px;flex-wrap:wrap">
+              <span class="small" style="width:100%">Dias da semana:</span>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="1" checked> Seg</label>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="2" checked> Ter</label>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="3" checked> Qua</label>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="4" checked> Qui</label>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="5" checked> Sex</label>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="6"> Sáb</label>
+              <label class="small"><input type="checkbox" class="wf-rec-day" value="0"> Dom</label>
+            </div>
+            <select id="wfRecPriority">
+              <option value="low">Prioridade baixa</option>
+              <option value="medium" selected>Prioridade média</option>
+              <option value="high">Prioridade alta</option>
+            </select>
+            <div class="row" style="gap:8px">
+              <button id="wfRecSave" class="primary" style="flex:1">Adicionar</button>
+              <button id="wfRecCancel" class="ghost" style="flex:1">Cancelar</button>
+            </div>
+          </div>
+          <div id="widgetList" class="list"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="plan"><span class="tab-ico">🗂️</span><span class="tab-lbl">Plano</span></button>
+    <button class="tab" data-tab="today"><span class="tab-ico">☀️</span><span class="tab-lbl">Hoje</span></button>
+    <button class="tab" data-tab="week"><span class="tab-ico">🗓️</span><span class="tab-lbl">Semana</span></button>
+    <button class="tab" data-tab="month"><span class="tab-ico">📅</span><span class="tab-lbl">Mês</span></button>
+    <button class="tab" data-tab="report"><span class="tab-ico">📊</span><span class="tab-lbl">Metas</span></button>
+    <button class="tab" data-tab="widget"><span class="tab-ico">⚡</span><span class="tab-lbl">Widget</span></button>
+  </nav>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   Minha Rotina — versão estável
+   ------------------------------------------------------------
+   Arquitetura:
+   - Login local por nome de usuário (sem senha, sem servidor).
+   - Cada usuário tem o próprio estado em localStorage:
+        rt:user:<username>
+   - UMA ÚNICA função de progresso (progressOf) é a fonte da verdade
+     usada pelo card da meta, pelo resumo e pelo relatório.
+   - Entradas em entries[date]:
+        's-<routineId>'  → status ('done'|'missed'|'canceled'|'pending')
+        'm-<goalId>'     → progresso manual numérico
+   - Importação da planilha usa ID estável (hash de mês+categoria+tarefa)
+     para que reimportar atualize em vez de duplicar.
+   ============================================================ */
+
+/* ---------- Storage keys ---------- */
+const USERS_KEY = 'rt:users';            // [{name, hash, salt, createdAt}]
+const CURRENT_KEY = 'rt:currentUser';    // 'maria'
+const SESSION_KEY = 'rt:session';        // { user, token, expires }
+const stateKey = u => 'rt:user:' + u;
+
+/* ---------- Constants ---------- */
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MONTH_KEYS = MONTHS.map(m => m.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+const WD = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const today = new Date();
+let curM = today.getMonth(), curY = today.getFullYear(), weekRef = today;
+
+function iso(d){
+  return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+}
+const PRIO_PT = { low: 'Baixa', medium: 'Média', high: 'Alta' };
+function prioPt(p){ return PRIO_PT[p] || p; }
+
+/* ── Modal de confirmação elegante (substitui confirm() nativo) ── */
+function showConfirm(msg, { label = 'Confirmar', danger = false } = {}){
+  return new Promise(resolve => {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9998;padding:20px;backdrop-filter:blur(4px)';
+    const btnStyle = danger
+      ? 'background:rgba(231,170,170,.35);color:#ffd5d5;border:1px solid rgba(231,170,170,.4)'
+      : 'background:rgba(255,255,255,.85);color:#5a3a35';
+    modal.innerHTML = `
+      <div style="background:var(--card-strong);border-radius:22px;padding:26px;max-width:360px;width:100%;border:1px solid var(--line);box-shadow:var(--shadow)">
+        <p style="margin:0 0 20px;line-height:1.55;font-size:.97rem">${msg}</p>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="_cmCancel" class="ghost" style="min-height:42px;padding:10px 18px">Cancelar</button>
+          <button id="_cmOk" style="min-height:42px;padding:10px 18px;border:0;border-radius:999px;font-weight:600;cursor:pointer;font:inherit;${btnStyle}">${label}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    const cleanup = ok => { modal.remove(); resolve(ok); };
+    modal.querySelector('#_cmOk').onclick     = () => cleanup(true);
+    modal.querySelector('#_cmCancel').onclick = () => cleanup(false);
+    modal.onclick = e => { if(e.target === modal) cleanup(false); };
+  });
+}
+
+function fmtDate(dateStr){
+  if(!dateStr) return '';
+  const [y,m,d] = dateStr.split('-');
+  const months = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  return `${parseInt(d)} de ${months[parseInt(m)-1]}. de ${y}`;
+}
+
+/* Formata um intervalo de horário: "10:00 – 11:30", ou só "10:00" se não houver fim. */
+function fmtTimeRange(start, end){
+  if(!start && !end) return '';
+  if(start && end) return `${start} – ${end}`;
+  return start || end || '';
+}
+
+function tmin(t){
+  if(!t) return null;
+  const p = t.split(':');
+  return p.length < 2 ? null : parseInt(p[0],10)*60 + parseInt(p[1],10);
+}
+function overlap(a1,a2,b1,b2){ return a1 < b2 && b1 < a2; }
+
+function uuid(){
+  if(crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'u-' + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+}
+
+function stableId(parts){
+  const s = parts.filter(Boolean).join('|').toLowerCase().trim();
+  let h = 5381;
+  for(let i=0;i<s.length;i++) h = ((h<<5) + h + s.charCodeAt(i)) | 0;
+  return 'imp-' + (h >>> 0).toString(36);
+}
+
+function showToast(msg, ms=2400){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+/* ============================================================
+   USER / AUTH
+   ============================================================
+   Cada usuário é armazenado como { name, salt, hash, createdAt } em
+   USERS_KEY. A senha NUNCA fica em claro: usamos PBKDF2 (Web Crypto)
+   com 100k iterações + salt aleatório por usuário.
+
+   Importante: como tudo isso é local, alguém com acesso ao DevTools
+   pode ler o hash. PBKDF2 garante que recuperar a senha exige força
+   bruta cara, mas não é uma proteção militar — é equivalente ao que
+   apps locais (notas, lembretes) oferecem. Vale para separar dados
+   entre amigos no mesmo dispositivo, NÃO para guardar segredos críticos.
+   ============================================================ */
+
+function normalizeUsername(u){
+  return (u || '').trim().toLowerCase().replace(/\s+/g,'-');
+}
+
+/* Lista usuários (objetos completos). Migração: se ainda for um array
+   de strings (formato v1, sem senha), converte cada string em
+   {name, salt:null, hash:null} e marca como "legacy" — qualquer senha
+   é aceita no primeiro login e o hash real é gravado naquele momento. */
+function listUsers(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    if(Array.isArray(raw) && raw.length && typeof raw[0] === 'string'){
+      // Migra do formato antigo: usuários sem senha (legacy)
+      return raw.map(name => ({ name, salt:null, hash:null, legacy:true, createdAt:null }));
+    }
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+}
+function saveUsers(users){
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+function findUser(name){
+  return listUsers().find(u => u.name === name) || null;
+}
+function currentUser(){
+  // Lê da sessão; se expirou, derruba.
+  try{
+    const sess = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    if(!sess) return null;
+    if(sess.expires && Date.now() > sess.expires){
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return sess.user;
+  } catch { return null; }
+}
+
+/* ----- Hash de senha (PBKDF2-SHA256) ----- */
+async function deriveHash(password, saltB64){
+  const enc = new TextEncoder();
+  const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+    key, 256
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(bits)));
+}
+function newSalt(){
+  const a = crypto.getRandomValues(new Uint8Array(16));
+  return btoa(String.fromCharCode(...a));
+}
+
+/* ----- Mensagens de erro nos painéis ----- */
+function showLoginErr(panel, msg){
+  const el = $(panel);
+  if(!el) return;
+  if(msg){ el.textContent = msg; el.style.display = 'block'; }
+  else { el.style.display = 'none'; el.textContent = ''; }
+}
+
+/* ============================================================
+   Ações: signup / login / logout / changePassword / resetAccount
+   ============================================================ */
+async function signup(){
+  showLoginErr('signupError', '');
+  const name = normalizeUsername($('signupUser').value);
+  const email = ($('signupEmail').value || '').trim().toLowerCase();
+  const p1 = $('signupPass').value;
+  const p2 = $('signupPass2').value;
+
+  if(!name) return showLoginErr('signupError', 'Informe um nome de usuário.');
+  if(name.length < 2) return showLoginErr('signupError', 'Nome muito curto.');
+  if(!/^[a-z0-9._-]+$/.test(name))
+    return showLoginErr('signupError', 'Use apenas letras, números, ponto, hífen ou underline.');
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return showLoginErr('signupError', 'Informe um e-mail válido para recuperação de senha.');
+  if(p1.length < 8) return showLoginErr('signupError', 'A senha precisa ter pelo menos 8 caracteres.');
+  if(p1 !== p2) return showLoginErr('signupError', 'As senhas não conferem.');
+
+  // Verifica conflito local
+  const users = listUsers();
+  if(users.some(u => u.name === name))
+    return showLoginErr('signupError', 'Esse usuário já existe. Escolha outro nome ou volte para o login.');
+
+  // Se Supabase configurado, verifica também na nuvem
+  if(hasSupabase()){
+    showLoginErr('signupError', '');
+    const existing = await supaGetUser(name);
+    if(existing)
+      return showLoginErr('signupError', 'Esse usuário já existe na nuvem. Volte para o login.');
+  }
+
+  const salt = newSalt();
+  const hash = await deriveHash(p1, salt);
+  const userObj = { name, email, salt, hash, createdAt: new Date().toISOString() };
+  users.push(userObj);
+  saveUsers(users);
+
+  // Cria estado vazio
+  state = defaultState();
+  state.meta.updatedAt = new Date().toISOString();
+  localStorage.setItem(stateKey(name), JSON.stringify(state));
+  setSession(name);
+
+  // Sobe para Supabase em background
+  if(hasSupabase()){
+    supaUpsertUser(userObj).catch(e => console.warn('signup supa user:', e));
+    supaUpsertState(name, state).catch(e => console.warn('signup supa state:', e));
+  }
+
+  $('signupUser').value = ''; $('signupEmail').value = '';
+  $('signupPass').value = ''; $('signupPass2').value = '';
+  showApp();
+  if(hasSupabase()) setSyncStatus('ok');
+  showToast('Conta criada. Bem-vindo(a), ' + name + '!');
+}
+
+async function login(){
+  showLoginErr('loginError', '');
+  const name = normalizeUsername($('loginUser').value);
+  const password = $('loginPass').value;
+
+  if(!name || !password) return showLoginErr('loginError', 'Preencha usuário e senha.');
+
+  // ── Estratégia: Supabase primeiro (se configurado), localStorage como fallback ──
+  let user = null;
+  let verifiedViaCloud = false;
+
+  if(hasSupabase()){
+    showLoginErr('loginError', '');
+    const cloudUser = await supaGetUser(name);
+    if(cloudUser){
+      user = cloudUser;
+      // Sincroniza para o cache local
+      const localUsers = listUsers().filter(u => u.name !== name);
+      localUsers.push({ name: cloudUser.username, salt: cloudUser.salt, hash: cloudUser.hash });
+      saveUsers(localUsers);
+      verifiedViaCloud = true;
+    }
+  }
+
+  // Se não encontrou na nuvem, tenta localmente
+  if(!user) user = findUser(name);
+  if(!user) return showLoginErr('loginError', 'Usuário ou senha incorretos.');
+
+  // Conta legada (sem senha): define a senha agora
+  if(user.legacy || !user.hash){
+    if(password.length < 8) return showLoginErr('loginError', 'A senha precisa ter pelo menos 8 caracteres.');
+    user.salt = newSalt();
+    user.hash = await deriveHash(password, user.salt);
+    user.legacy = false;
+    user.createdAt = user.createdAt || new Date().toISOString();
+    const users = listUsers().filter(u => u.name !== name);
+    users.push(user);
+    saveUsers(users);
+    if(hasSupabase()) supaUpsertUser({ username: name, salt: user.salt, hash: user.hash, created_at: user.createdAt }).catch(console.warn);
+    showToast('Senha definida para a conta existente.');
+  } else {
+    const test = await deriveHash(password, user.salt);
+    if(test !== user.hash) return showLoginErr('loginError', 'Usuário ou senha incorretos.');
+  }
+
+  setSession(name);
+  loadStateForCurrent();
+  $('loginUser').value = ''; $('loginPass').value = '';
+  showApp();
+
+  // Puxa dados da nuvem após entrar (pode atualizar o render)
+  if(hasSupabase()){
+    setSyncStatus('syncing');
+    syncFromCloud(name).then(updated => {
+      setSyncStatus('ok');
+      if(updated) renderAll();
+    }).catch(() => setSyncStatus('error'));
+  } else {
+    setSyncStatus('none');
+  }
+}
+
+function setSession(name){
+  // Sessão dura 30 dias por inatividade.
+  const expires = Date.now() + 30 * 86400000;
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ user: name, expires }));
+  // Mantém compatibilidade com código que ainda lê CURRENT_KEY
+  localStorage.setItem(CURRENT_KEY, name);
+}
+
+function logout(){
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(CURRENT_KEY);
+  state = defaultState();
+  showLogin();
+}
+
+async function recoverPassword(){
+  showLoginErr('resetError', '');
+  const name = normalizeUsername($('resetUser').value);
+  const email = ($('resetEmail').value || '').trim().toLowerCase();
+  const p1 = $('resetNewPass').value;
+  const p2 = $('resetNewPass2').value;
+
+  if(!name) return showLoginErr('resetError', 'Informe o nome de usuário.');
+  if(!email) return showLoginErr('resetError', 'Informe o e-mail.');
+  if(p1.length < 8) return showLoginErr('resetError', 'A nova senha precisa ter pelo menos 8 caracteres.');
+  if(p1 !== p2) return showLoginErr('resetError', 'As senhas não conferem.');
+
+  const user = findUser(name);
+  if(!user) return showLoginErr('resetError', 'Usuário não encontrado.');
+  if(!user.email) return showLoginErr('resetError', 'Esta conta não tem e-mail cadastrado. Não é possível recuperar a senha.');
+  if(user.email.toLowerCase() !== email)
+    return showLoginErr('resetError', 'O e-mail não confere com o cadastrado.');
+
+  const newSaltVal = newSalt();
+  const newHash = await deriveHash(p1, newSaltVal);
+  user.salt = newSaltVal;
+  user.hash = newHash;
+
+  const users = listUsers().filter(u => u.name !== name);
+  users.push(user);
+  saveUsers(users);
+
+  if(hasSupabase()) supaUpsertUser(user).catch(e => console.warn('recover supa:', e));
+
+  $('resetUser').value = ''; $('resetEmail').value = '';
+  $('resetNewPass').value = ''; $('resetNewPass2').value = '';
+  showLoginPanel('login');
+  showToast('Senha redefinida! Faça login com a nova senha.');
+}
+
+async function deleteAccountFromLogin(){
+  showLoginErr('delError', '');
+  const name = normalizeUsername($('delUser').value);
+  const confirm1 = $('delConfirm').value.trim();
+
+  if(!name) return showLoginErr('delError', 'Informe o nome do usuário.');
+  if(confirm1 !== 'APAGAR') return showLoginErr('delError', 'Digite APAGAR (em maiúsculas) para confirmar.');
+
+  const user = findUser(name);
+  if(!user) return showLoginErr('delError', 'Usuário não encontrado.');
+
+  saveUsers(listUsers().filter(u => u.name !== name));
+  localStorage.removeItem(stateKey(name));
+  if(currentUser() === name){
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(CURRENT_KEY);
+  }
+
+  $('delUser').value = ''; $('delConfirm').value = '';
+  showLoginPanel('login');
+  showToast('Conta "' + name + '" apagada.');
+}
+
+async function changePassword(){
+  // Cria modal inline em vez de usar prompt() nativo
+  const existing = document.getElementById('changePwModal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'changePwModal';
+  modal.style.cssText = `
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,.55);display:flex;align-items:center;
+    justify-content:center;z-index:9999;padding:20px;
+    backdrop-filter:blur(4px);
+  `;
+  modal.innerHTML = `
+    <div style="
+      background:var(--card-strong);border-radius:24px;padding:28px;
+      max-width:400px;width:100%;border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    ">
+      <h3 style="margin:0 0 18px;font-size:1.1rem">🔒 Trocar senha</h3>
+      <input id="cpOld" type="password" placeholder="Senha atual" autocomplete="current-password"
+        style="margin-bottom:10px;display:block;width:100%;padding:12px 14px;border-radius:14px;
+        border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--txt);font:inherit">
+      <input id="cpNew" type="password" placeholder="Nova senha (mínimo 8 caracteres)" autocomplete="new-password"
+        style="margin-bottom:10px;display:block;width:100%;padding:12px 14px;border-radius:14px;
+        border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--txt);font:inherit">
+      <input id="cpNew2" type="password" placeholder="Confirmar nova senha" autocomplete="new-password"
+        style="margin-bottom:12px;display:block;width:100%;padding:12px 14px;border-radius:14px;
+        border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--txt);font:inherit">
+      <div id="cpError" style="display:none;padding:10px 12px;border-radius:12px;margin-bottom:10px;
+        background:rgba(231,170,170,.18);color:#ffd5d5;font-size:.85rem;
+        border:1px solid rgba(231,170,170,.35)"></div>
+      <div style="display:flex;gap:8px">
+        <button id="cpCancel" class="ghost" style="flex:1;min-height:44px">Cancelar</button>
+        <button id="cpSave" class="primary" style="flex:1;min-height:44px">Salvar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  const showErr = msg => {
+    const el = document.getElementById('cpError');
+    el.textContent = msg; el.style.display = 'block';
+  };
+
+  document.getElementById('cpCancel').onclick = () => modal.remove();
+  modal.onclick = e => { if(e.target === modal) modal.remove(); };
+  document.getElementById('cpOld').focus();
+
+  document.getElementById('cpSave').onclick = async () => {
+    const oldPass = document.getElementById('cpOld').value;
+    const newPass = document.getElementById('cpNew').value;
+    const newPass2 = document.getElementById('cpNew2').value;
+    const name = currentUser();
+    const user = findUser(name);
+
+    if(!oldPass){ showErr('Informe a senha atual.'); return; }
+    if(!user.legacy && user.hash){
+      const test = await deriveHash(oldPass, user.salt);
+      if(test !== user.hash){ showErr('Senha atual incorreta.'); return; }
+    }
+    if(newPass.length < 8){ showErr('A nova senha deve ter pelo menos 8 caracteres.'); return; }
+    if(newPass !== newPass2){ showErr('As senhas não conferem.'); return; }
+
+    const salt = newSalt();
+    user.salt = salt;
+    user.hash = await deriveHash(newPass, salt);
+    user.legacy = false;
+    const users = listUsers().filter(u => u.name !== name);
+    users.push(user);
+    saveUsers(users);
+    modal.remove();
+    showToast('✓ Senha alterada com sucesso.');
+  };
+}
+
+/* ----- UI dos painéis ----- */
+function showLoginPanel(which){
+  for(const p of ['login','signup','reset','delete']){
+    const el = $(p + 'Panel');
+    if(el) el.style.display = (p === which) ? 'block' : 'none';
+  }
+  // Limpa erros e foca no primeiro campo
+  ['loginError','signupError','resetError','delError'].forEach(id => showLoginErr(id, ''));
+  const focusId = which === 'login' ? 'loginUser'
+                : which === 'signup' ? 'signupUser'
+                : which === 'reset' ? 'resetUser'
+                : 'delUser';
+  setTimeout(() => { const el = $(focusId); if(el) el.focus(); }, 50);
+}
+
+function showApp(){
+  $('loginScreen').style.display = 'none';
+  $('appScreen').style.display = 'block';
+  $('welcomeUser').textContent = 'Olá, ' + currentUser();
+  document.body.classList.remove('tab-today','tab-week','tab-month','tab-report','tab-settings');
+  document.body.classList.add('tab-plan');
+  // Garante que a view ativa seja Planejamento ao entrar
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('view-plan').classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'plan'));
+  renderAll();
+}
+function showLogin(){
+  $('appScreen').style.display = 'none';
+  $('loginScreen').style.display = 'flex';
+  document.body.classList.remove('tab-plan','tab-today','tab-week','tab-month','tab-report','tab-settings');
+  showLoginPanel('login');
+}
+
+/* ============================================================
+   SUPABASE SYNC
+   ============================================================
+   Arquitetura:
+   - localStorage = cache offline (escrita síncrona, leitura imediata)
+   - Supabase = fonte da verdade cross-device (escrita async em background)
+   - Ao fazer login: puxa o estado mais recente da nuvem (por updated_at)
+   - A cada save(): grava local + dispara syncToCloud() sem bloquear UI
+   - Funciona offline: se Supabase estiver inacessível, fica no local.
+
+   Tabelas Supabase (criadas pelo usuário via SQL Editor):
+     rt_users  { username, salt, hash, created_at }
+     rt_states { username, state_json, updated_at }
+
+   O anon key fica no HTML mas é projetado para isso pelo Supabase.
+   RLS controla quem pode ler/gravar (policy "allow_all" com anon).
+   ============================================================ */
+
+const SUPA_CONFIG_KEY = 'rt:supabase';   // { url, key }
+const VERSION_KEY = 'rt:version';
+const CURRENT_VERSION = '6';
+
+/* ── Limpeza de versão anterior ──
+   Na primeira abertura da v6, apaga todos os dados locais (começo limpo).
+   Preserva a config do Supabase caso já tenha sido feita. */
+function migrateToV6(){
+  if(localStorage.getItem(VERSION_KEY) === CURRENT_VERSION) return;
+  const supaCfg = localStorage.getItem(SUPA_CONFIG_KEY);
+  // Apaga tudo rt:*
+  Object.keys(localStorage).filter(k => k.startsWith('rt:')).forEach(k => localStorage.removeItem(k));
+  if(supaCfg) localStorage.setItem(SUPA_CONFIG_KEY, supaCfg);
+  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+}
+
+/* ── Config helpers ── */
+function getSupaConfig(){
+  try{ return JSON.parse(localStorage.getItem(SUPA_CONFIG_KEY) || 'null'); }
+  catch{ return null; }
+}
+function setSupaConfig(url, key){
+  localStorage.setItem(SUPA_CONFIG_KEY, JSON.stringify({
+    url: (url||'').trim().replace(/\/+$/,''),
+    key: (key||'').trim()
+  }));
+}
+function hasSupabase(){
+  const c = getSupaConfig();
+  return !!(c && c.url && c.key);
+}
+
+/* ── Low-level REST fetch ── */
+async function supaFetch(path, opts = {}){
+  const cfg = getSupaConfig();
+  if(!cfg) throw new Error('Supabase não configurado');
+  const res = await fetch(cfg.url + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': cfg.key,
+      'Authorization': 'Bearer ' + cfg.key,
+      'Content-Type': 'application/json',
+      ...(opts.headers || {})
+    }
+  });
+  if(!res.ok){
+    const msg = await res.text().catch(() => String(res.status));
+    throw new Error('HTTP ' + res.status + ': ' + msg.slice(0,120));
+  }
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+/* ── Testar conexão ── */
+async function testSupaConnection(url, key){
+  const prev = localStorage.getItem(SUPA_CONFIG_KEY);
+  setSupaConfig(url, key);
+  try{
+    const cfg = getSupaConfig();
+    const res = await fetch(cfg.url + '/rest/v1/rt_users?limit=1', {
+      headers:{ 'apikey': cfg.key, 'Authorization': 'Bearer ' + cfg.key }
+    });
+    if(res.status === 200 || res.status === 206){
+      return { ok:true };
+    }
+    if(res.status === 404){
+      // Restaura e indica que as tabelas não existem
+      if(prev) localStorage.setItem(SUPA_CONFIG_KEY, prev);
+      else localStorage.removeItem(SUPA_CONFIG_KEY);
+      return { ok:false, needsSQL:true,
+        error:'Tabelas não encontradas. Execute o SQL no Supabase SQL Editor primeiro.' };
+    }
+    if(res.status === 401 || res.status === 403){
+      if(prev) localStorage.setItem(SUPA_CONFIG_KEY, prev);
+      else localStorage.removeItem(SUPA_CONFIG_KEY);
+      return { ok:false, error:'Chave inválida. Verifique a anon key.' };
+    }
+    if(prev) localStorage.setItem(SUPA_CONFIG_KEY, prev);
+    else localStorage.removeItem(SUPA_CONFIG_KEY);
+    return { ok:false, error:'Erro ' + res.status };
+  } catch(e){
+    if(prev) localStorage.setItem(SUPA_CONFIG_KEY, prev);
+    else localStorage.removeItem(SUPA_CONFIG_KEY);
+    return { ok:false, error:'Sem conexão ou URL inválida: ' + e.message };
+  }
+}
+
+/* ── Operações de usuário no Supabase ── */
+async function supaGetUser(username){
+  try{
+    const rows = await supaFetch(
+      'rt_users?username=eq.' + encodeURIComponent(username) +
+      '&select=username,salt,hash,created_at&limit=1'
+    );
+    return rows && rows[0] || null;
+  } catch{ return null; }
+}
+async function supaUpsertUser(user){
+  return supaFetch('rt_users', {
+    method:'POST',
+    headers:{ 'Prefer':'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify(user)
+  });
+}
+
+/* ── Operações de estado no Supabase ── */
+async function supaGetState(username){
+  try{
+    const rows = await supaFetch(
+      'rt_states?username=eq.' + encodeURIComponent(username) +
+      '&select=state_json,updated_at&limit=1'
+    );
+    return rows && rows[0] || null;
+  } catch{ return null; }
+}
+async function supaUpsertState(username, stateObj){
+  return supaFetch('rt_states', {
+    method:'POST',
+    headers:{ 'Prefer':'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify({
+      username,
+      state_json: stateObj,
+      updated_at: new Date().toISOString()
+    })
+  });
+}
+
+/* ── Indicador visual de sync ── */
+function setSyncStatus(s){
+  const el = $('syncDot');
+  if(!el) return;
+  el.className = 'sync-dot sync-' + s;
+  const labels = {
+    ok:      '✓ Sincronizado com a nuvem',
+    syncing: '↻ Sincronizando…',
+    error:   '✗ Erro ao sincronizar (dados salvos localmente)',
+    offline: '○ Offline — dados salvos localmente',
+    none:    'Sincronização não configurada'
+  };
+  el.title = labels[s] || '';
+}
+
+/* ── Push local → nuvem (chamado depois de cada save) ── */
+async function syncToCloud(){
+  if(!hasSupabase()) return;
+  const u = currentUser();
+  if(!u) return;
+  try{
+    setSyncStatus('syncing');
+    await supaUpsertState(u, state);
+    setSyncStatus('ok');
+  } catch(e){
+    console.warn('syncToCloud:', e);
+    setSyncStatus('error');
+  }
+}
+
+/* ── Pull nuvem → local (chamado no login) ── */
+async function syncFromCloud(username){
+  if(!hasSupabase()) return false;
+  try{
+    setSyncStatus('syncing');
+    const remote = await supaGetState(username);
+    if(!remote){ setSyncStatus('ok'); return false; }
+
+    const remoteTs = new Date(remote.updated_at).getTime();
+    const localTs = (state.meta && state.meta.updatedAt)
+      ? new Date(state.meta.updatedAt).getTime() : 0;
+
+    if(remoteTs > localTs){
+      // Nuvem é mais recente — substitui o local
+      state = remote.state_json;
+      loadStateForCurrent_postProcess();
+      localStorage.setItem(stateKey(username), JSON.stringify(state));
+      setSyncStatus('ok');
+      showToast('☁ Dados atualizados da nuvem');
+      return true; // indica que houve atualização
+    }
+    // Local é mais recente ou igual — manda pra nuvem
+    await supaUpsertState(username, state);
+    setSyncStatus('ok');
+    return false;
+  } catch(e){
+    console.warn('syncFromCloud:', e);
+    setSyncStatus(navigator.onLine ? 'error' : 'offline');
+    return false;
+  }
+}
+
+/* ── UI do painel de setup ── */
+function copySetupSql(){
+  const sql = $('setupSql').textContent;
+  navigator.clipboard.writeText(sql).then(
+    () => showToast('SQL copiado!'),
+    () => showToast('Selecione e copie manualmente')
+  );
+}
+
+function initSupaSetupPanel(){
+  const cfg = getSupaConfig();
+  if(cfg && cfg.url){
+    $('supaUrl').value = cfg.url;
+    $('supaKey').value = cfg.key;
+    $('supaSaveBtn').disabled = false;
+    $('supaDisableBtn').style.display = 'inline-flex';
+    $('supaConnResult').innerHTML = '<div class="conn-ok">✓ Supabase configurado</div>';
+  } else {
+    $('supaDisableBtn').style.display = 'none';
+  }
+}
+
+/* ============================================================
+   STATE (per-user)
+   ============================================================ */
+function defaultState(){
+  return {
+    goals: [],
+    events: [],
+    recurring: [],
+    specificDateTasks: [],
+    entries: {},
+    meta: { lastImport: null, schema: 2 }
+  };
+}
+
+let state = defaultState();
+
+function loadStateForCurrent(){
+  const u = currentUser();
+  if(!u){ state = defaultState(); return; }
+  try{
+    const raw = localStorage.getItem(stateKey(u));
+    state = raw ? JSON.parse(raw) : defaultState();
+  } catch {
+    state = defaultState();
+  }
+  // Schema migration: ensure all required arrays/objects exist
+  state.goals = state.goals || [];
+  state.events = state.events || [];
+  state.recurring = state.recurring || [];
+  state.specificDateTasks = state.specificDateTasks || [];
+  state.entries = state.entries || {};
+  state.meta = state.meta || { schema: 2 };
+  // Migrate legacy goal.progress (number) → baseline if needed
+  state.goals.forEach(g => {
+    if(g.baseline == null && typeof g.progress === 'number') g.baseline = g.progress;
+    if(g.baseline == null) g.baseline = 0;
+    if(!g.status) g.status = 'active';
+    if(!g.source) g.source = 'manual';
+    // v3 fields
+    if(!g.outcome) g.outcome = g.status === 'archived' ? 'done' : 'pending';
+    if(g.failReason == null) g.failReason = '';
+    if(g.deadlineExtensions == null) g.deadlineExtensions = 0;
+    // v4 fields:
+    //   entryMode: 'sum' (default) ou 'snapshot' (substitui o valor)
+    //   startValue: para snapshot — valor de partida (ex.: peso inicial)
+    if(!g.entryMode) g.entryMode = 'sum';
+    if(g.startValue === undefined) g.startValue = null;
+  });
+
+  // Migra rotinas antigas {days, start, end} → {schedule:[{days, start, end}]}
+  state.recurring.forEach(r => {
+    if(!r.schedule){
+      r.schedule = [{
+        days: r.days || [],
+        start: r.start || '',
+        end: r.end || ''
+      }];
+      delete r.days; delete r.start; delete r.end;
+    }
+  });
+}
+
+function save(){
+  const u = currentUser();
+  if(!u) return;
+  // Carimba o timestamp de atualização (usado para resolução de conflitos)
+  state.meta = state.meta || {};
+  state.meta.updatedAt = new Date().toISOString();
+  localStorage.setItem(stateKey(u), JSON.stringify(state));
+  renderAll();
+  // Sync para a nuvem em background — não bloqueia a UI
+  if(hasSupabase()) syncToCloud().catch(() => setSyncStatus('error'));
+}
+
+/* ============================================================
+   PROGRESS — single source of truth
+   ============================================================
+   Para cada meta, o progresso é a soma de:
+    1) goal.baseline                      (pré-carga: planilha)
+    2) Para cada rotina vinculada:
+       count de dias em que entries[date]['s-' + routineId] === 'done'
+       multiplicado por (rotina.increment || 1)
+    3) Soma de entries[date]['m-' + goal.id] (progresso manual)
+*/
+/* progressOf — fonte da verdade.
+   Lida com 3 cenários:
+     1. Modo 'snapshot' (peso, medidas): pega o último 'v-' lançado e
+        calcula percentual a partir de startValue → target.
+     2. Meta em série (importada e com mais de uma ocorrência da mesma
+        tarefa em meses diferentes): conta apenas lançamentos cujo
+        date.month/year batem com goal.month/year.
+     3. Modo padrão 'sum': soma baseline + rotinas marcadas 'done' +
+        lançamentos manuais 'm-'. */
+function progressOf(goal){
+  if(!goal) return { done:0, target:0, percent:0, linkedCount:0 };
+
+  // ---- Snapshot ----
+  if(goal.entryMode === 'snapshot'){
+    return snapshotProgress(goal);
+  }
+
+  // ---- Soma (incl. série) ----
+  const seriesAware = goal.source === 'imported' && isPartOfSeries(goal);
+  let linked;
+  if(seriesAware){
+    // Vínculos da série inteira: a rotina pode ter sido vinculada a
+    // qualquer mês da série; contamos quando bate o mês desta meta.
+    const siblingIds = new Set(seriesGoalsFor(goal).map(g => g.id));
+    linked = state.recurring.filter(r => siblingIds.has(r.goalId));
+  } else {
+    linked = state.recurring.filter(r => r.goalId === goal.id);
+  }
+
+  let done = Number(goal.baseline) || 0;
+  const goalMonthIdx = goal.month ? MONTHS.indexOf(goal.month) : -1;
+  const goalYear = Number(goal.year) || null;
+
+  for(const date of Object.keys(state.entries)){
+    if(seriesAware){
+      const d = new Date(date + 'T00:00:00');
+      if(d.getMonth() !== goalMonthIdx) continue;
+      if(goalYear && d.getFullYear() !== goalYear) continue;
+    }
+    const day = state.entries[date] || {};
+    for(const r of linked){
+      if(day['s-' + r.id] === 'done') done += Number(r.increment) || 1;
+    }
+    const m = Number(day['m-' + goal.id]);
+    if(Number.isFinite(m) && m > 0) done += m;
+  }
+
+  const target = Math.max(0, Number(goal.target) || 0);
+  const percent = target > 0 ? Math.min(100, Math.round(done / target * 100)) : 0;
+  return { done, target, percent, linkedCount: linked.length };
+}
+
+/* snapshotProgress — para metas tipo "valor atual" (peso, etc.)
+   Pega o último 'v-<goalId>' lançado e calcula % do caminho percorrido
+   entre startValue e target. Funciona pra perder OU ganhar valor. */
+function snapshotProgress(goal){
+  const svRaw = goal.startValue;
+  const sv = (svRaw == null) ? NaN : Number(svRaw);
+  const tv = Number(goal.target);
+  const target = Number.isFinite(tv) ? tv : 0;
+
+  // Último snapshot
+  let latest = null, latestDate = null;
+  for(const date of Object.keys(state.entries)){
+    const v = Number((state.entries[date] || {})['v-' + goal.id]);
+    if(Number.isFinite(v)){
+      if(!latestDate || date > latestDate){
+        latestDate = date;
+        latest = v;
+      }
+    }
+  }
+
+  if(!Number.isFinite(sv) || !Number.isFinite(tv)){
+    // startValue ainda não definido — sem como calcular %.
+    return {
+      done: latest != null ? latest : 0,
+      target,
+      percent: 0,
+      linkedCount: 0,
+      snapshot: true,
+      current: latest,
+      startValue: Number.isFinite(sv) ? sv : null,
+      latestDate,
+      missingStart: !Number.isFinite(sv)
+    };
+  }
+
+  const current = latest != null ? latest : sv;
+  const totalDelta = Math.abs(sv - tv);
+  let percent = 0;
+  if(totalDelta === 0){
+    percent = 100;
+  } else {
+    const reducing = sv > tv;
+    if(reducing){
+      if(current >= sv) percent = 0;
+      else if(current <= tv) percent = 100;
+      else percent = ((sv - current) / totalDelta) * 100;
+    } else {
+      if(current <= sv) percent = 0;
+      else if(current >= tv) percent = 100;
+      else percent = ((current - sv) / totalDelta) * 100;
+    }
+  }
+
+  return {
+    done: current,
+    target,
+    percent: Math.max(0, Math.min(100, Math.round(percent))),
+    linkedCount: 0,
+    snapshot: true,
+    current,
+    startValue: sv,
+    latestDate
+  };
+}
+
+/* ------------------------------------------------------------
+   Helpers de "metas repetidas mês a mês"
+   ------------------------------------------------------------
+   A planilha cria várias linhas para a mesma tarefa repetindo
+   por mês (Treinar Muay Thai, Aulas de Inglês, etc.). No
+   Planejamento e no dropdown de vincular não queremos ver
+   todas — só a do mês corrente. */
+function repeatSignature(g){
+  // Normaliza nome+categoria, ignora caixa e acentos.
+  const k = (g.name || '') + '|' + (g.category || '');
+  return k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+
+function getRepeatGroups(){
+  // Mapa signature → [goals]. Considera só metas importadas.
+  const groups = {};
+  for(const g of state.goals){
+    if(g.source !== 'imported') continue;
+    const k = repeatSignature(g);
+    (groups[k] = groups[k] || []).push(g);
+  }
+  return groups;
+}
+
+function seriesGoalsFor(g){
+  const sig = repeatSignature(g);
+  return state.goals.filter(x => repeatSignature(x) === sig);
+}
+
+function isPartOfSeries(g){
+  if(g.source !== 'imported') return false;
+  return seriesGoalsFor(g).filter(x => x.source === 'imported').length >= 2;
+}
+
+/* Retorna o conjunto de IDs de metas a esconder no Planejamento:
+   versões antigas/futuras de séries que se repetem mês a mês.
+   Para cada série com 2+ ocorrências:
+     - mantém a versão do mês corrente, se existir
+     - senão mantém a mais próxima do mês corrente
+     - esconde as outras */
+function hiddenRepeatIds(){
+  const hidden = new Set();
+  const groups = getRepeatGroups();
+  const todayName = MONTHS[today.getMonth()];
+  const todayYear = today.getFullYear();
+  const monthIdx = name => MONTHS.indexOf(name);
+
+  for(const sig of Object.keys(groups)){
+    const series = groups[sig];
+    if(series.length < 2) continue;  // não é série recorrente
+
+    // Tenta a do mês corrente do ano corrente
+    let keeper = series.find(g => g.month === todayName && Number(g.year) === todayYear);
+    // Fallback: a com prazo mais próximo do hoje (ainda não vencida ou a mais recente)
+    if(!keeper){
+      const sorted = series.slice().sort((a,b) => {
+        const ay = Number(a.year)||0, by = Number(b.year)||0;
+        if(ay !== by) return ay - by;
+        return monthIdx(a.month) - monthIdx(b.month);
+      });
+      keeper = sorted.find(g => {
+        if(Number(g.year) > todayYear) return true;
+        if(Number(g.year) < todayYear) return false;
+        return monthIdx(g.month) >= today.getMonth();
+      }) || sorted[sorted.length - 1];
+    }
+
+    for(const g of series){
+      if(g.id !== keeper.id) hidden.add(g.id);
+    }
+  }
+  return hidden;
+}
+
+/* ------------------------------------------------------------
+   Prazos e estado efetivo da meta
+   ------------------------------------------------------------ */
+function goalDeadlineDate(g){
+  if(g.deadline){
+    const d = new Date(g.deadline + 'T23:59:59');
+    if(!isNaN(d)) return d;
+  }
+  if(g.month && g.year){
+    const idx = MONTHS.indexOf(g.month);
+    if(idx >= 0){
+      return new Date(Number(g.year), idx + 1, 0, 23, 59, 59); // último dia do mês
+    }
+  }
+  return null;
+}
+
+function isOverdue(g){
+  // Vencida = prazo passou e ainda está com outcome 'pending' e progresso < 100%
+  if(g.outcome && g.outcome !== 'pending') return false;
+  const dl = goalDeadlineDate(g);
+  if(!dl) return false;
+  if(dl < today){
+    const p = progressOf(g);
+    return p.percent < 100;
+  }
+  return false;
+}
+
+/* riskState — sinaliza metas próximas do prazo abaixo do esperado.
+   Retorna 'overdue' | 'at-risk' | 'on-track'. */
+function riskState(g){
+  if(isOverdue(g)) return 'overdue';
+  if(g.outcome && g.outcome !== 'pending') return 'on-track';
+  const dl = goalDeadlineDate(g);
+  if(!dl) return 'on-track';
+  const msPerDay = 86400000;
+  const daysLeft = Math.ceil((dl - today) / msPerDay);
+  if(daysLeft < 0 || daysLeft > 7) return 'on-track';
+  const p = progressOf(g);
+  // Em risco: faltam ≤ 7 dias e progresso < 60%.
+  if(p.percent < 60) return 'at-risk';
+  return 'on-track';
+}
+
+function daysUntilDeadline(g){
+  const dl = goalDeadlineDate(g);
+  if(!dl) return null;
+  return Math.ceil((dl - today) / 86400000);
+}
+
+/* Status final que aparece na badge da meta:
+     'done'     → concluída (manual ou progresso 100%)
+     'failed'   → não feita (manual)
+     'canceled' → cancelada
+     'overdue'  → vencida sem decisão
+     'active'   → em andamento dentro do prazo */
+function effectiveStatus(g){
+  if(g.outcome === 'done') return 'done';
+  if(g.outcome === 'failed') return 'failed';
+  if(g.outcome === 'canceled') return 'canceled';
+  if(g.status === 'archived') return 'done';
+  const p = progressOf(g);
+  if(p.percent >= 100 && p.target > 0) return 'done';
+  if(isOverdue(g)) return 'overdue';
+  if(riskState(g) === 'at-risk') return 'at-risk';
+  return 'active';
+}
+
+/* ============================================================
+   CRUD básico
+   ============================================================ */
+/* recurringFor — devolve OCORRÊNCIAS (não rotinas) num dado dia.
+   Cada ocorrência traz a rotina e o slot que casou com o dia da semana,
+   permitindo editar o horário daquele slot específico.  */
+function recurringFor(date){
+  const dow = new Date(date + 'T00:00:00').getDay();
+  const out = [];
+  for(const r of state.recurring){
+    const slots = r.schedule || [];
+    for(let i = 0; i < slots.length; i++){
+      const s = slots[i];
+      if((s.days || []).includes(dow)){
+        out.push({ routine: r, slot: s, slotIndex: i, dow });
+      }
+    }
+  }
+  return out;
+}
+function eventsFor(date){
+  return state.events.filter(e => e.date === date);
+}
+function entry(date, k){
+  return (state.entries[date] || {})[k];
+}
+function setEntry(date, k, v){
+  state.entries[date] = state.entries[date] || {};
+  if(v === null || v === undefined || v === ''){
+    delete state.entries[date][k];
+    if(!Object.keys(state.entries[date]).length) delete state.entries[date];
+  } else {
+    state.entries[date][k] = v;
+  }
+}
+function status(date, id){ return entry(date, 's-' + id) || 'pending'; }
+function setStatus(date, id, v){ setEntry(date, 's-' + id, v); }
+/* Alias usado pela aba Widget — mesma leitura de status. */
+function getStatus(date, id){ return status(date, id); }
+
+function addGoal(){
+  const name = $('goalName').value.trim();
+  const type = $('goalType').value;
+  const target = Number($('goalTarget').value);
+  const unit = $('goalUnit').value.trim() || 'itens';
+  const entryMode = $('goalEntryMode').value || 'sum';
+  const startValue = entryMode === 'snapshot' ? Number($('goalStartValue').value) : null;
+  const month = $('goalMonth').value || '';
+  const year = Number($('goalYear').value) || new Date().getFullYear();
+  const deadline = $('goalDeadline').value || '';
+  if(!name || !Number.isFinite(target)) return;
+  if(entryMode === 'snapshot' && !Number.isFinite(startValue)){
+    showToast('⚠ Informe o valor inicial para esse tipo de meta.');
+    return;
+  }
+  // Se houver deadline específico, deriva month/year dele para compatibilidade
+  let finalMonth = month || null;
+  let finalYear = month ? year : null;
+  if(deadline){
+    const dl = new Date(deadline + 'T00:00:00');
+    if(!isNaN(dl)){
+      finalMonth = MONTHS[dl.getMonth()];
+      finalYear = dl.getFullYear();
+    }
+  }
+  const now = new Date().toISOString();
+  state.goals.push({
+    id: uuid(), name, type, target, unit,
+    month: finalMonth, year: finalYear,
+    deadline: deadline || null,
+    baseline: 0, status: 'active', source: 'manual',
+    entryMode, startValue: Number.isFinite(startValue) ? startValue : null,
+    outcome: 'pending', failReason: '', deadlineExtensions: 0,
+    createdAt: now, updatedAt: now
+  });
+  $('goalName').value = ''; $('goalTarget').value = ''; $('goalUnit').value = '';
+  $('goalMonth').value = ''; $('goalYear').value = '';
+  $('goalDeadline').value = '';
+  $('goalStartValue').value = ''; $('goalEntryMode').value = 'sum';
+  $('snapshotStartRow').style.display = 'none';
+  save();
+  renderPlan(); renderReport(); stats();
+  showToast('✓ Meta adicionada');
+}
+
+function addEvent(){
+  const title = $('eventTitle').value.trim();
+  const date = $('eventDate').value;
+  const time = $('eventTime').value;
+  const endTime = $('eventEndTime').value;
+  const priority = $('eventPriority').value;
+  if(!title || !date) return;
+  state.events.push({ id: uuid(), title, date, time, endTime, priority });
+  $('eventTitle').value = ''; $('eventTime').value = ''; $('eventEndTime').value = '';
+  $('eventDate').value = '';
+  $('eventPriority').value = 'medium';
+  save();
+  renderPlan(); renderToday(); renderWeek(); renderMonth();
+  showToast('▶ Evento adicionado');
+}
+
+/* ── Atividades únicas por data ── */
+function addTask(){
+  const title = $('taskTitle').value.trim();
+  const date = $('taskDate').value;
+  const time = $('taskTime').value || '';
+  const endTime = $('taskEndTime').value || '';
+  const priority = $('taskPriority').value;
+  if(!title || !date) return;
+  state.specificDateTasks.push({ 
+    id: uuid(), title, date, time, endTime, priority, createdAt: new Date().toISOString()
+  });
+  $('taskTitle').value = ''; $('taskDate').value = ''; $('taskTime').value = '';
+  $('taskEndTime').value = '';
+  $('taskPriority').value = 'medium';
+  save();
+  renderPlan(); renderToday(); renderWeek(); renderMonth();
+  showToast('✦ Atividade adicionada');
+}
+
+function deleteTask(taskId){
+  state.specificDateTasks = state.specificDateTasks.filter(t => t.id !== taskId);
+  delete state.entries['task:' + taskId];
+  save();
+  renderPlan();
+  renderToday();
+}
+
+function tasksFor(date){
+  return (state.specificDateTasks || []).filter(t => t.date === date);
+}
+
+/* conflict — agora considera todos os slots de todas as rotinas. */
+function conflict(newSchedule){
+  for(const ns of newSchedule){
+    if(!ns.start || !ns.end) continue;
+    const s1 = tmin(ns.start), e1 = tmin(ns.end);
+    if(s1 == null || e1 == null) continue;
+    for(const r of state.recurring){
+      for(const s of (r.schedule || [])){
+        if(!s.start || !s.end) continue;
+        const overlapDays = (ns.days || []).some(d => (s.days || []).includes(d));
+        if(overlapDays && overlap(s1, e1, tmin(s.start), tmin(s.end))) return true;
+      }
+    }
+  }
+  return false;
+}
+
+function addRec(){
+  const title = $('recTitle').value.trim();
+  const start = $('recStart').value;
+  const end = $('recEnd').value;
+  const goalId = $('recGoal').value || '';
+  const priority = $('recPriority').value;
+  const days = [...document.querySelectorAll('.rec-day:checked')].map(x => Number(x.value));
+  if(!title || !days.length) return;
+  const schedule = [{ days, start, end }];
+  if(conflict(schedule)){ showToast('⚠ Conflito de horário com outra rotina nesse dia.'); return; }
+  state.recurring.push({
+    id: uuid(), title, goalId, priority, increment: 1, schedule
+  });
+  $('recTitle').value = ''; $('recStart').value = ''; $('recEnd').value = ''; $('recGoal').value = '';
+  document.querySelectorAll('.rec-day').forEach(cb => { cb.checked = [1,2,3,4,5].includes(Number(cb.value)); });
+  save();
+  renderPlan(); renderToday(); renderWeek();
+  showToast('↻ Rotina adicionada');
+}
+
+/* editRoutineSlot — usado pela aba "Hoje" para alterar o horário
+   apenas do dia da semana visível. Se o slot tem outros dias agrupados,
+   "extrai" só o dia editado para um slot novo, deixando os outros
+   intactos. */
+function editRoutineSlot(routineId, dow, newStart, newEnd){
+  const r = state.recurring.find(x => x.id === routineId);
+  if(!r) return;
+  const slots = r.schedule || [];
+  const idx = slots.findIndex(s => (s.days || []).includes(dow));
+  if(idx < 0) return;
+  const slot = slots[idx];
+  if((slot.days || []).length === 1){
+    slot.start = newStart;
+    slot.end = newEnd;
+  } else {
+    // Remove o dow desse slot e cria um novo só para esse dow
+    slot.days = slot.days.filter(d => d !== dow);
+    slots.push({ days: [dow], start: newStart, end: newEnd });
+  }
+  save();
+  showToast('Horário atualizado');
+}
+
+async function deleteGoal(id){
+  const ok = await showConfirm('Apagar esta meta? Rotinas vinculadas serão desvinculadas.', { label:'Apagar', danger:true });
+  if(!ok) return;
+  state.goals = state.goals.filter(g => g.id !== id);
+  state.recurring.forEach(r => { if(r.goalId === id) r.goalId = ''; });
+  // Limpa entradas manuais e snapshots desta meta
+  for(const d of Object.keys(state.entries)){
+    delete state.entries[d]['m-' + id];
+    delete state.entries[d]['v-' + id];
+    if(!Object.keys(state.entries[d]).length) delete state.entries[d];
+  }
+  save();
+  renderPlan(); renderReport(); stats();
+  showToast('✓ Meta removida');
+}
+
+function deleteEvent(id){
+  state.events = state.events.filter(e => e.id !== id);
+  save();
+}
+
+async function deleteRec(id){
+  const ok = await showConfirm('Apagar esta rotina? O histórico de marcações será removido.', { label:'Apagar', danger:true });
+  if(!ok) return;
+  state.recurring = state.recurring.filter(r => r.id !== id);
+  for(const d of Object.keys(state.entries)){
+    delete state.entries[d]['s-' + id];
+    if(!Object.keys(state.entries[d]).length) delete state.entries[d];
+  }
+  save();
+  renderPlan(); renderToday(); renderWeek();
+  showToast('✓ Rotina removida');
+}
+
+/* Lança progresso manual em uma meta para a data de hoje (ou a data corrente) */
+function logManualProgress(goalId, amount, dateStr){
+  const date = dateStr || iso(today);
+  const cur = Number(entry(date, 'm-' + goalId)) || 0;
+  setEntry(date, 'm-' + goalId, cur + amount);
+  save();
+  showToast('+ ' + amount + ' registrado em ' + date);
+}
+
+/* updateSnapshot — registra/atualiza valor do dia para metas snapshot. */
+function updateSnapshot(goalId, value, dateStr){
+  const date = dateStr || iso(today);
+  setEntry(date, 'v-' + goalId, Number(value));
+  save();
+  showToast('Valor atualizado: ' + value);
+}
+
+/* Remove um lançamento manual específico (linha da timeline). */
+function removeEntry(date, key){
+  setEntry(date, key, '');
+  save();
+  showToast('Lançamento removido');
+}
+
+/* getEntriesForGoal — devolve a timeline de lançamentos da meta,
+   já ordenada do mais recente para o mais antigo. */
+function getEntriesForGoal(goal){
+  const out = [];
+  const linked = state.recurring.filter(r => r.goalId === goal.id);
+  // Para metas em série, considera a série inteira
+  const series = (goal.source === 'imported' && isPartOfSeries(goal)) ? seriesGoalsFor(goal) : [goal];
+  const goalIds = new Set(series.map(g => g.id));
+  // routines linked to any goal in the series
+  const allRoutines = goal.entryMode === 'snapshot' ? [] :
+    state.recurring.filter(r => goalIds.has(r.goalId));
+  const goalMonthIdx = goal.month ? MONTHS.indexOf(goal.month) : -1;
+  const goalYear = Number(goal.year) || null;
+  const seriesAware = series.length > 1;
+
+  const dates = Object.keys(state.entries).sort().reverse();
+  for(const date of dates){
+    if(seriesAware){
+      const d = new Date(date + 'T00:00:00');
+      if(d.getMonth() !== goalMonthIdx) continue;
+      if(goalYear && d.getFullYear() !== goalYear) continue;
+    }
+    const day = state.entries[date] || {};
+    // Manual sums
+    const m = Number(day['m-' + goal.id]);
+    if(Number.isFinite(m) && m !== 0){
+      out.push({ date, key: 'm-' + goal.id, kind: 'manual', amount: m, source: 'manual' });
+    }
+    // Snapshot
+    const v = Number(day['v-' + goal.id]);
+    if(Number.isFinite(v)){
+      out.push({ date, key: 'v-' + goal.id, kind: 'snapshot', amount: v, source: 'snapshot' });
+    }
+    // Routines
+    for(const r of allRoutines){
+      if(day['s-' + r.id] === 'done'){
+        out.push({ date, key: 's-' + r.id, kind: 'routine', amount: Number(r.increment) || 1, source: r.title, routineId: r.id });
+      }
+    }
+  }
+  return out;
+}
+
+/* categoryColor — gera uma cor pastel estável para a categoria.
+   Hash simples da string → matiz HSL. */
+const CATEGORY_COLORS = {
+  'Saúde': '#9fd4a8',
+  'Acadêmicos': '#9ec3e3',
+  'Inglês': '#c8b3dc',
+  'Leitura': '#e8c989',
+  'Compras': '#f4b48f',
+  'Viagens': '#e8a4a4',
+  'Geral': null
+};
+function categoryColor(cat){
+  if(!cat) return null;
+  if(CATEGORY_COLORS[cat] !== undefined) return CATEGORY_COLORS[cat];
+  // hash → hue
+  let h = 0;
+  for(let i=0;i<cat.length;i++) h = (h*31 + cat.charCodeAt(i)) | 0;
+  const hue = ((h % 360) + 360) % 360;
+  return `hsl(${hue}, 50%, 70%)`;
+}
+
+/* ----- Estado manual / outcome ----- */
+function setGoalOutcome(goalId, outcome, reason){
+  const g = state.goals.find(x => x.id === goalId);
+  if(!g) return;
+  g.outcome = outcome;             // 'pending' | 'done' | 'failed' | 'canceled'
+  if(outcome === 'failed'){
+    if(reason !== undefined) g.failReason = reason;
+  } else {
+    g.failReason = '';
+  }
+  // 'done' ou 'archived' representam histórico
+  g.status = (outcome === 'done' || outcome === 'canceled') ? 'archived' : 'active';
+  g.updatedAt = new Date().toISOString();
+  save();
+}
+
+/* ----- Estender prazo da meta em N meses (default 1) ----- */
+function extendDeadline(goalId, months){
+  const g = state.goals.find(x => x.id === goalId);
+  if(!g) return;
+  const m = months || 1;
+  // Recalcula deadline: prefere goal.deadline (data); senão usa goal.month/year.
+  let dl = goalDeadlineDate(g);
+  if(!dl){
+    // Sem prazo conhecido — usa hoje + m meses
+    dl = new Date(today.getFullYear(), today.getMonth() + m, 0);
+  } else {
+    dl = new Date(dl.getFullYear(), dl.getMonth() + 1 + m, 0);
+  }
+  g.deadline = iso(dl);
+  g.month = MONTHS[dl.getMonth()];
+  g.year = dl.getFullYear();
+  g.outcome = 'pending';
+  g.status = 'active';
+  g.deadlineExtensions = (g.deadlineExtensions || 0) + m;
+  g.updatedAt = new Date().toISOString();
+  save();
+  showToast('Prazo estendido para ' + g.month + '/' + g.year);
+}
+
+/* ----- Edição inline da meta (nome, target, unidade) ----- */
+function editGoal(goalId, patch){
+  const g = state.goals.find(x => x.id === goalId);
+  if(!g) return;
+  if(patch.name !== undefined) g.name = String(patch.name).trim() || g.name;
+  if(patch.target !== undefined){
+    const t = Number(patch.target);
+    // Permite 0 só pra reset; >0 para metas normais. Snapshot pode ser qualquer número.
+    if(Number.isFinite(t)) g.target = t;
+  }
+  if(patch.unit !== undefined) g.unit = String(patch.unit).trim() || g.unit;
+  if(patch.baseline !== undefined){
+    const b = Number(patch.baseline);
+    if(Number.isFinite(b) && b >= 0) g.baseline = b;
+  }
+  if(patch.entryMode !== undefined && (patch.entryMode === 'sum' || patch.entryMode === 'snapshot')){
+    g.entryMode = patch.entryMode;
+  }
+  if(patch.startValue !== undefined){
+    const sv = Number(patch.startValue);
+    g.startValue = Number.isFinite(sv) ? sv : null;
+  }
+  if(patch.deadline !== undefined){
+    const dlStr = String(patch.deadline || '').trim();
+    if(dlStr){
+      const dl = new Date(dlStr + 'T00:00:00');
+      if(!isNaN(dl)){
+        g.deadline = dlStr;
+        // Sincroniza month/year para consistência com o resto do código
+        g.month = MONTHS[dl.getMonth()];
+        g.year = dl.getFullYear();
+      }
+    } else {
+      // Permite limpar a data específica e voltar ao prazo por mês
+      g.deadline = null;
+    }
+  }
+  g.updatedAt = new Date().toISOString();
+  save();
+  showToast('✓ Meta atualizada');
+}
+
+/* ============================================================
+   BACKUP / RESTORE
+   ============================================================
+   Como o app salva em localStorage do navegador (volátil em
+   celular: limpar cache, modo anônimo, troca de aparelho fazem
+   sumir tudo), oferecemos 3 saídas e 1 entrada.
+   - Baixar JSON: download .json (vai pra pasta Arquivos no iOS).
+   - Compartilhar: Web Share API (WhatsApp, Drive, e-mail…).
+   - Copiar: copia o JSON pro clipboard.
+   - Importar: lê arquivo .json e substitui o estado do usuário.
+*/
+function buildBackup(){
+  return {
+    appVersion: 'minha-rotina-v4',
+    exportedAt: new Date().toISOString(),
+    user: currentUser(),
+    state: state
+  };
+}
+function backupFilename(){
+  return 'minha-rotina_' + (currentUser() || 'backup') + '_' + iso(new Date()) + '.json';
+}
+function exportBackup(){
+  const data = JSON.stringify(buildBackup(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = backupFilename();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  state.meta.lastBackup = new Date().toISOString();
+  // Não chama save() pra não disparar render — só persiste a marca
+  localStorage.setItem(stateKey(currentUser()), JSON.stringify(state));
+  updateBackupStatus();
+  showToast('Backup baixado');
+}
+async function shareBackup(){
+  const data = JSON.stringify(buildBackup(), null, 2);
+  const file = new File([data], backupFilename(), { type: 'application/json' });
+  try{
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], title: 'Backup Minha Rotina' });
+      state.meta.lastBackup = new Date().toISOString();
+      localStorage.setItem(stateKey(currentUser()), JSON.stringify(state));
+      updateBackupStatus();
+      return;
+    }
+  } catch(err){
+    if(err && err.name === 'AbortError') return;
+    console.warn('share failed:', err);
+  }
+  // Fallback: baixa
+  exportBackup();
+}
+async function copyBackup(){
+  const data = JSON.stringify(buildBackup(), null, 2);
+  try{
+    await navigator.clipboard.writeText(data);
+    showToast('JSON copiado para a área de transferência');
+  } catch(err){
+    showToast('Não consegui copiar — use "Baixar JSON"');
+  }
+}
+function importBackup(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      const incoming = data.state || data;
+      if(!incoming || typeof incoming !== 'object' || !Array.isArray(incoming.goals)){
+        showToast('⚠ Arquivo inválido: não parece ser um backup do Minha Rotina.');
+        return;
+      }
+      const u = currentUser();
+      showConfirm(
+        `Isso vai <strong>substituir TODOS os dados</strong> do usuário <strong>"${u}"</strong> pelos do arquivo importado.<br><br>Faça backup dos dados atuais antes de continuar.`,
+        { label:'Importar e substituir', danger:true }
+      ).then(ok => {
+        if(!ok) return;
+        state = incoming;
+        loadStateForCurrent_postProcess();
+        save();
+        renderAll();
+        showToast('✓ Backup restaurado com sucesso');
+        refreshSettings();
+      });
+    } catch(err){
+      showToast('⚠ Falha ao ler o arquivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* Reaproveita a lógica de migração já existente após restaurar backup. */
+function loadStateForCurrent_postProcess(){
+  state.goals = state.goals || [];
+  state.events = state.events || [];
+  state.recurring = state.recurring || [];
+  state.entries = state.entries || {};
+  state.meta = state.meta || { schema: 4 };
+  state.goals.forEach(g => {
+    if(g.baseline == null && typeof g.progress === 'number') g.baseline = g.progress;
+    if(g.baseline == null) g.baseline = 0;
+    if(!g.status) g.status = 'active';
+    if(!g.source) g.source = 'manual';
+    if(!g.outcome) g.outcome = g.status === 'archived' ? 'done' : 'pending';
+    if(g.failReason == null) g.failReason = '';
+    if(g.deadlineExtensions == null) g.deadlineExtensions = 0;
+    if(!g.entryMode) g.entryMode = 'sum';
+    if(g.startValue === undefined) g.startValue = null;
+  });
+  state.recurring.forEach(r => {
+    if(!r.schedule){
+      r.schedule = [{ days: r.days || [], start: r.start || '', end: r.end || '' }];
+      delete r.days; delete r.start; delete r.end;
+    }
+  });
+}
+
+function updateBackupStatus(){
+  const el = $('backupStatus');
+  if(!el) return;
+  const last = state.meta && state.meta.lastBackup;
+  if(!last){
+    el.innerHTML = '<span style="color:#f7c887">⚠ Você ainda não fez backup. Recomendo fazer pelo menos uma vez por semana.</span>';
+    return;
+  }
+  const days = Math.floor((new Date() - new Date(last)) / 86400000);
+  if(days >= 7){
+    el.innerHTML = '<span style="color:#f7c887">⚠ Seu último backup foi há ' + days + ' dias. Considere fazer um novo.</span>';
+  } else {
+    el.textContent = 'Último backup: há ' + (days === 0 ? 'menos de 1 dia' : (days + ' dia(s)')) + '.';
+  }
+}
+
+/* ============================================================
+   IMPORTAÇÃO XLSX
+   ============================================================
+   Lê a aba "Objetivos_2026" no formato:
+     [Mês, Categoria, Tarefa/Objetivo, Prazo, Valor Orçado, Valor Gasto, <flag boolean>]
+   - Cria um goal por linha com ID estável.
+   - Se a flag (col 7) for True → marca como histórico (status='archived',
+     baseline = target → 100% de progresso).
+   - Se False → entra como meta ativa (baseline=0).
+   - Reimportação: mesmo ID → atualiza, não duplica.
+*/
+function parseTargetFromName(name){
+  if(!name) return { target: 1, unit: 'tarefa', type: 'tasks' };
+  const n = String(name);
+  let m;
+  // "Meta 12x/mês" ou "(Meta 12x/mês)"
+  m = n.match(/(?:Meta\s+)?(\d+)\s*x?\s*\/\s*m[eê]s/i);
+  if(m) return { target: Number(m[1]), unit: 'vezes/mês', type: 'count' };
+  // "Total 140/ano"
+  m = n.match(/Total\s+(\d+)\s*\/?\s*ano/i);
+  if(m) return { target: Number(m[1]), unit: 'vezes/ano', type: 'count' };
+  // "2x por semana" → ~8/mês
+  m = n.match(/(\d+)\s*x?\s*por\s*semana/i);
+  if(m) return { target: Number(m[1]) * 4, unit: 'vezes/mês', type: 'count' };
+  // "400 págs" / "400 páginas"
+  m = n.match(/(\d+)\s*p[áa]gs?\b/i);
+  if(m) return { target: Number(m[1]), unit: 'páginas', type: 'pages' };
+  // "80 artigos"
+  m = n.match(/(\d+)\s*artigos?\b/i);
+  if(m) return { target: Number(m[1]), unit: 'artigos', type: 'count' };
+  // "X kg"
+  m = n.match(/(\d+)\s*kg\b/i);
+  if(m) return { target: Number(m[1]), unit: 'kg', type: 'count' };
+  // qualquer número de 2+ dígitos
+  m = n.match(/(\d{2,})/);
+  if(m) return { target: Number(m[1]), unit: 'itens', type: 'count' };
+  // single task
+  return { target: 1, unit: 'tarefa', type: 'tasks' };
+}
+
+function isMonth(s){
+  if(!s) return false;
+  const k = String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  return MONTH_KEYS.includes(k);
+}
+
+function importXlsx(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+      // Procura aba que pareça "Objetivos"; senão usa a primeira
+      let sheetName = wb.SheetNames.find(n => /objetivo/i.test(n)) || wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+
+      let created = 0, updated = 0, skipped = 0;
+      const now = new Date().toISOString();
+
+      for(let i = 1; i < rows.length; i++){
+        const row = rows[i] || [];
+        const mes = row[0], categoria = row[1], tarefa = row[2];
+        const prazo = row[3], orcado = row[4], gasto = row[5], doneFlag = row[6];
+
+        if(!isMonth(mes) || !tarefa || typeof tarefa !== 'string') { skipped++; continue; }
+
+        const id = stableId([mes, categoria || '', tarefa]);
+        const parsed = parseTargetFromName(tarefa);
+        const isDone = doneFlag === true;
+        // Auto-detecta modo snapshot: metas com "kg" no título são "valor atual"
+        // (ex.: "Chegar aos 80kg" — não faz sentido somar lançamentos).
+        const isSnapshot = /\d+\s*kg\b/i.test(tarefa) || /\bkg\b/i.test(tarefa);
+
+        // Tenta achar meta existente
+        const existing = state.goals.find(g => g.id === id);
+        const baseGoal = {
+          id,
+          name: tarefa.trim(),
+          type: parsed.type,
+          target: parsed.target,
+          unit: parsed.unit,
+          category: String(categoria || '').trim(),
+          month: String(mes).trim(),
+          year: prazo instanceof Date ? prazo.getFullYear() :
+                (typeof prazo === 'string' && prazo.match(/\d{4}/) ? Number(prazo.match(/\d{4}/)[0]) : new Date().getFullYear()),
+          deadline: prazo instanceof Date ? iso(prazo) : null,
+          budget: typeof orcado === 'number' ? orcado : null,
+          spent: typeof gasto === 'number' ? gasto : null,
+          status: isDone ? 'archived' : 'active',
+          baseline: isDone ? parsed.target : 0,
+          entryMode: isSnapshot ? 'snapshot' : 'sum',
+          startValue: null,
+          outcome: isDone ? 'done' : 'pending',
+          failReason: '',
+          deadlineExtensions: 0,
+          source: 'imported',
+          updatedAt: now
+        };
+
+        if(existing){
+          // Atualização: preserva baseline manual + entryMode/startValue se já personalizados
+          const preserveBaseline = !isDone && existing.source === 'imported';
+          state.goals = state.goals.map(g => g.id === id ? {
+            ...existing,
+            ...baseGoal,
+            baseline: preserveBaseline ? (existing.baseline || 0) : baseGoal.baseline,
+            // Preserva o modo escolhido pelo usuário (caso tenha mudado manualmente)
+            entryMode: existing.entryMode || baseGoal.entryMode,
+            startValue: existing.startValue != null ? existing.startValue : baseGoal.startValue,
+            // Preserva outcome se já foi marcado manualmente
+            outcome: existing.outcome && existing.outcome !== 'pending' ? existing.outcome : baseGoal.outcome,
+            failReason: existing.failReason || baseGoal.failReason,
+            createdAt: existing.createdAt || now
+          } : g);
+          updated++;
+        } else {
+          state.goals.push({ ...baseGoal, createdAt: now });
+          created++;
+        }
+      }
+
+      state.meta.lastImport = now;
+      save();
+      const msg = `Importação concluída: ${created} novas, ${updated} atualizadas, ${skipped} ignoradas.`;
+      $('importStatus').textContent = msg;
+      showToast(msg, 4000);
+    } catch(err){
+      console.error(err);
+      $('importStatus').textContent = 'Erro ao ler a planilha: ' + err.message;
+      showToast('Erro ao ler a planilha');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderPlan(){
+  const box = $('planList');
+  box.innerHTML = '';
+
+  // Goals filtering — apenas para popular o dropdown "Vincular à meta"
+  const hidden = hiddenRepeatIds();
+  const visibleGoals = state.goals.filter(g => !hidden.has(g.id));
+
+  // Eventos
+  state.events.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'item prio-' + (e.priority || 'medium');
+    const timeStr = fmtTimeRange(e.time, e.endTime);
+    d.innerHTML = `
+      <div class="between">
+        <div>
+          <strong>${escapeHtml(e.title)}</strong>
+          <div class="small">${e.date}${timeStr ? ' · ' + timeStr : ''}</div>
+        </div>
+        <div class="row">
+          <span class="label">Evento</span>
+          <button class="iconbtn" data-del-event="${e.id}">×</button>
+        </div>
+      </div>`;
+    box.appendChild(d);
+  });
+
+  // Atividades únicas
+  if((state.specificDateTasks || []).length > 0){
+    const head = document.createElement('div');
+    head.className = 'small';
+    head.style.marginTop = '10px';
+    head.textContent = 'Atividades únicas (' + state.specificDateTasks.length + ')';
+    box.appendChild(head);
+  }
+  (state.specificDateTasks || []).forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'item prio-' + (t.priority || 'medium');
+    const timeStr = fmtTimeRange(t.time, t.endTime);
+    d.innerHTML = `
+      <div class="between">
+        <div>
+          <strong>✦ ${escapeHtml(t.title)}</strong>
+          <div class="small">${t.date}${timeStr ? ' · ' + timeStr : ''}</div>
+        </div>
+        <div class="row">
+          <span class="label">Atividade</span>
+          <button class="iconbtn" data-del-task="${t.id}">×</button>
+        </div>
+      </div>`;
+    box.appendChild(d);
+  });
+
+  // Rotinas — agora com múltiplos slots possíveis
+  state.recurring.forEach(r => {
+    const goal = r.goalId ? state.goals.find(g => g.id === r.goalId) : null;
+    const slots = r.schedule || [];
+    const slotLines = slots.map(s =>
+      (s.days || []).map(x => WD[x]).join(', ') +
+      ' · ' + (s.start || '') +
+      (s.end ? ' - ' + s.end : '')
+    ).join('<br>');
+    const d = document.createElement('div');
+    d.className = 'item prio-' + (r.priority || 'medium');
+    d.innerHTML = `
+      <div class="between">
+        <div>
+          <strong>${escapeHtml(r.title)}</strong>
+          <div class="small">
+            ${slotLines}
+            ${goal ? '<br>vinculada a "' + escapeHtml(goal.name) + '"' : ''}
+          </div>
+        </div>
+        <div class="row">
+          <span class="label">Rotina</span>
+          <button class="iconbtn" data-del-rec="${r.id}">×</button>
+        </div>
+      </div>`;
+    box.appendChild(d);
+  });
+
+  // Dropdown "Vincular à meta macro" — mesmas regras de filtragem das séries
+  // (mostrar só mês corrente para repetidas) + esconde arquivadas.
+  const goalsForSelect = visibleGoals.filter(g => g.status !== 'archived');
+  $('recGoal').innerHTML = '<option value="">Vincular à meta macro</option>' +
+    goalsForSelect.map(g => {
+      const tag = g.month ? ' · ' + g.month : '';
+      return `<option value="${g.id}">${escapeHtml(g.name + tag)}</option>`;
+    }).join('');
+
+  // Wire de todos os botões dentro do plano
+  wireGoalCardEvents(box);
+  box.querySelectorAll('[data-del-event]').forEach(b => b.onclick = () => deleteEvent(b.dataset.delEvent));
+  box.querySelectorAll('[data-del-task]').forEach(b => b.onclick = () => deleteTask(b.dataset.delTask));
+  box.querySelectorAll('[data-del-rec]').forEach(b => b.onclick = () => deleteRec(b.dataset.delRec));
+}
+
+/* Wire dos botões dentro de cards de meta — usado tanto no Planejamento
+   quanto no Relatório, já que ambos usam renderGoalCard / o mesmo conjunto
+   de data-attributes. */
+function wireGoalCardEvents(box){
+  box.querySelectorAll('[data-del-goal]').forEach(b => b.onclick = () => deleteGoal(b.dataset.delGoal));
+  box.querySelectorAll('[data-add-progress]').forEach(b => b.onclick = () => {
+    const id = b.dataset.addProgress;
+    const input = box.querySelector('[data-progress-input="' + id + '"]');
+    const v = Number(input.value);
+    if(!Number.isFinite(v) || v <= 0){ showToast('Informe um valor válido'); return; }
+    logManualProgress(id, v);
+    input.value = '';
+  });
+  box.querySelectorAll('[data-plus-one]').forEach(b => b.onclick = () => {
+    logManualProgress(b.dataset.plusOne, 1);
+  });
+
+  // Snapshot: registrar valor de hoje (substitui)
+  box.querySelectorAll('[data-update-snapshot]').forEach(b => b.onclick = () => {
+    const id = b.dataset.updateSnapshot;
+    const input = box.querySelector('[data-snapshot-input="' + id + '"]');
+    const v = Number(input.value);
+    if(!Number.isFinite(v)){ showToast('Informe um valor válido'); return; }
+    updateSnapshot(id, v);
+    input.value = '';
+  });
+
+  // Timeline (histórico de lançamentos)
+  box.querySelectorAll('[data-toggle-timeline]').forEach(b => b.onclick = () => {
+    const id = b.dataset.toggleTimeline;
+    const tl = box.querySelector('[data-timeline="' + id + '"]');
+    if(!tl) return;
+    if(tl.style.display === 'block'){
+      tl.style.display = 'none';
+      b.textContent = 'ver lançamentos';
+    } else {
+      const goal = state.goals.find(x => x.id === id);
+      tl.innerHTML = renderTimelineHTML(goal);
+      tl.style.display = 'block';
+      b.textContent = 'esconder lançamentos';
+      // Liga botões de remover dentro da timeline
+      tl.querySelectorAll('[data-remove-entry]').forEach(rb => rb.onclick = async () => {
+        const ok = await showConfirm('Remover este lançamento?', { label:'Remover', danger:true });
+        if(!ok) return;
+        const [date, key] = rb.dataset.removeEntry.split('::');
+        removeEntry(date, key);
+      });
+    }
+  });
+
+  // Edição inline da meta
+  box.querySelectorAll('[data-edit-goal]').forEach(b => b.onclick = () => {
+    const id = b.dataset.editGoal;
+    const form = box.querySelector('[data-edit-form="' + id + '"]');
+    if(form) form.style.display = (form.style.display === 'grid') ? 'none' : 'grid';
+  });
+  box.querySelectorAll('[data-save-goal]').forEach(b => b.onclick = () => {
+    const id = b.dataset.saveGoal;
+    const form = box.querySelector('[data-edit-form="' + id + '"]');
+    if(!form) return;
+    editGoal(id, {
+      name: form.querySelector('[data-edit-name]').value,
+      target: form.querySelector('[data-edit-target]').value,
+      unit: form.querySelector('[data-edit-unit]').value,
+      baseline: form.querySelector('[data-edit-baseline]').value,
+      entryMode: form.querySelector('[data-edit-mode]').value,
+      startValue: form.querySelector('[data-edit-startvalue]').value,
+      deadline: form.querySelector('[data-edit-deadline]').value
+    });
+    renderReport(); renderPlan(); stats();
+  });
+  box.querySelectorAll('[data-cancel-edit]').forEach(b => b.onclick = () => {
+    const id = b.dataset.cancelEdit;
+    const form = box.querySelector('[data-edit-form="' + id + '"]');
+    if(form) form.style.display = 'none';
+  });
+
+  // Status manual no relatório (radio)
+  box.querySelectorAll('input[type=radio][data-outcome]').forEach(i => i.onchange = function() {
+    const goalId = this.dataset.goal;
+    const outcome = this.dataset.outcome;
+    if(outcome === 'failed'){
+      showReasonModal(goalId, state.goals.find(g => g.id === goalId)?.failReason || '');
+    } else {
+      setGoalOutcome(goalId, outcome);
+    }
+  });
+  box.querySelectorAll('[data-extend]').forEach(b => b.onclick = () => {
+    extendDeadline(b.dataset.extend, 1);
+  });
+  box.querySelectorAll('[data-apply-deadline]').forEach(b => b.onclick = () => {
+    const id = b.dataset.applyDeadline;
+    const input = box.querySelector('[data-quick-deadline="' + id + '"]');
+    if(!input || !input.value){
+      showToast('⚠ Selecione uma data primeiro');
+      return;
+    }
+    editGoal(id, { deadline: input.value });
+    renderReport(); renderPlan(); stats();
+    showToast('✓ Novo prazo: ' + fmtDate(input.value));
+  });
+  box.querySelectorAll('[data-edit-reason]').forEach(b => b.onclick = () => {
+    const id = b.dataset.editReason;
+    const g = state.goals.find(x => x.id === id);
+    showReasonModal(id, g && g.failReason || '');
+  });
+}
+
+function showReasonModal(goalId, currentReason){
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9998;padding:20px;backdrop-filter:blur(4px)';
+  modal.innerHTML = `
+    <div style="background:var(--card-strong);border-radius:22px;padding:26px;max-width:400px;width:100%;border:1px solid var(--line);box-shadow:var(--shadow)">
+      <p style="margin:0 0 12px;font-weight:600">Por que esta meta não foi concluída?</p>
+      <textarea id="_reasonTxt" placeholder="Descreva brevemente o motivo..." style="width:100%;min-height:80px;margin-bottom:12px;padding:10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--txt);font:inherit;resize:vertical">${escapeHtml(currentReason)}</textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="_rCancel" class="ghost" style="min-height:42px;padding:10px 18px">Cancelar</button>
+        <button id="_rSave" class="primary" style="min-height:42px;padding:10px 18px">Salvar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#_rSave').onclick = () => {
+    const reason = modal.querySelector('#_reasonTxt').value;
+    setGoalOutcome(goalId, 'failed', reason);
+    modal.remove();
+  };
+  modal.querySelector('#_rCancel').onclick = () => modal.remove();
+  modal.onclick = e => { if(e.target === modal) modal.remove(); };
+  setTimeout(() => modal.querySelector('#_reasonTxt').focus(), 50);
+}
+
+/* Renderiza a timeline de lançamentos de uma meta. */
+function renderTimelineHTML(goal){
+  if(!goal) return '';
+  const items = getEntriesForGoal(goal);
+  if(!items.length){
+    return '<div class="timeline-empty">Nenhum lançamento registrado ainda.</div>';
+  }
+  return items.map(it => {
+    const dateBR = new Date(it.date + 'T00:00:00').toLocaleDateString('pt-BR',
+      { day: '2-digit', month: '2-digit', year: 'numeric' });
+    let line;
+    if(it.kind === 'manual'){
+      line = `+${it.amount} ${escapeHtml(goal.unit || '')}`;
+    } else if(it.kind === 'snapshot'){
+      line = `${it.amount} ${escapeHtml(goal.unit || '')} <span class="src">(snapshot)</span>`;
+    } else {
+      line = `+${it.amount} ${escapeHtml(goal.unit || '')} <span class="src">(rotina: ${escapeHtml(it.source)})</span>`;
+    }
+    return `
+      <div class="timeline-item">
+        <span class="date">${dateBR}</span>
+        <span style="flex:1">${line}</span>
+        <button class="iconbtn" data-remove-entry="${it.date}::${it.key}" title="remover">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+/* renderGoalCard
+   ----------------
+   Card de uma meta macro. Ele aparece tanto no Planejamento (modo
+   "compact": só progresso e botões de registrar) quanto no Relatório
+   (modo "report": adiciona radios de status, motivo, estender prazo).
+   - opts.report = true → mostra controles de outcome.
+*/
+function renderGoalCard(g, opts){
+  opts = opts || {};
+  const p = progressOf(g);
+  const eff = effectiveStatus(g);
+  const overdue = eff === 'overdue';
+  const atRisk = eff === 'at-risk';
+
+  const d = document.createElement('div');
+  const cls = ['item'];
+  if(g.status === 'archived') cls.push('archived');
+  if(opts.report){
+    if(g.outcome === 'done') cls.push('outcome-done');
+    if(g.outcome === 'failed') cls.push('outcome-failed');
+    if(g.outcome === 'canceled') cls.push('outcome-canceled');
+  }
+  if(overdue) cls.push('overdue');
+  if(atRisk) cls.push('at-risk');
+  d.className = cls.join(' ');
+
+  // Faixa colorida por categoria
+  const catColor = categoryColor(g.category);
+  if(g.category){
+    d.setAttribute('data-cat', g.category);
+    if(catColor) d.style.setProperty('--cat-color', catColor);
+  }
+
+  const isSnapshot = g.entryMode === 'snapshot';
+  const showManualUI = g.status !== 'archived' && g.outcome !== 'canceled';
+  const hasLinked = p.linkedCount > 0;
+  const fillCls = (g.outcome === 'failed') ? 'failed' : (p.percent >= 100 ? 'full' : '');
+
+  // Badge à direita
+  const badgeText = (
+    eff === 'done'     ? 'Concluída' :
+    eff === 'failed'   ? 'Não feita' :
+    eff === 'canceled' ? 'Cancelada' :
+    eff === 'overdue'  ? 'Vencida'   :
+    eff === 'at-risk'  ? 'Em risco'  :
+                         (g.month ? g.month : 'Em andamento')
+  );
+  const badgeCls = (eff === 'done' ? 'label done' : 'label');
+
+  // Subtexto
+  const sub = [];
+  if(g.deadline){
+    sub.push('📅 ' + fmtDate(g.deadline));
+  } else if(g.month && g.year){
+    sub.push(escapeHtml(g.month + '/' + g.year));
+  } else if(g.month){
+    sub.push(escapeHtml(g.month));
+  }
+  if(g.deadlineExtensions) sub.push('estendida ' + g.deadlineExtensions + 'x');
+
+  // Bloco snapshot — destaque pro valor atual + diferença
+  let snapshotBlock = '';
+  if(isSnapshot){
+    const cur = p.current;
+    const sv = p.startValue;
+    let delta = '';
+    if(Number.isFinite(cur) && Number.isFinite(sv)){
+      const diff = cur - sv;
+      const sign = diff > 0 ? '+' : '';
+      delta = `desde o início: ${sign}${diff.toFixed(1)} ${escapeHtml(g.unit || '')}`;
+    } else if(p.missingStart){
+      delta = '<span style="color:#f7c887">defina o valor inicial em ✎</span>';
+    }
+    snapshotBlock = `
+      <div class="snapshot-current">
+        <div>
+          <div class="small">Valor atual</div>
+          <div class="val">${cur != null ? cur : '—'} <span class="small" style="font-weight:400">${escapeHtml(g.unit || '')}</span></div>
+        </div>
+        <div class="delta">${delta}<br><span class="small">alvo: ${g.target} ${escapeHtml(g.unit || '')}</span></div>
+      </div>
+    `;
+  }
+
+  // Bloco de status (só no relatório)
+  const statusBlock = opts.report ? `
+    <div class="status-row">
+      <label><input type="radio" name="o-${g.id}" data-goal="${g.id}" data-outcome="pending"  ${g.outcome === 'pending'  || !g.outcome ? 'checked' : ''}> Em andamento</label>
+      <label><input type="radio" name="o-${g.id}" data-goal="${g.id}" data-outcome="done"     ${g.outcome === 'done'     ? 'checked' : ''}> Feita</label>
+      <label><input type="radio" name="o-${g.id}" data-goal="${g.id}" data-outcome="failed"   ${g.outcome === 'failed'   ? 'checked' : ''}> Não feita</label>
+      <label><input type="radio" name="o-${g.id}" data-goal="${g.id}" data-outcome="canceled" ${g.outcome === 'canceled' ? 'checked' : ''}> Cancelada</label>
+    </div>
+  ` : '';
+
+  // Aviso de meta vencida
+  const overdueBlock = (opts.report && overdue) ? (() => {
+    const dlDate = goalDeadlineDate(g);
+    const dlLabel = g.deadline 
+      ? fmtDate(g.deadline)
+      : (g.month && g.year ? `${g.month}/${g.year}` : 'data indefinida');
+    return `
+    <div class="small" style="margin-top:8px">
+      <span class="overdue-badge">⚠ prazo passou em ${escapeHtml(dlLabel)}</span>
+      Decida o que fazer: registre progresso, marque "Feita" / "Não feita", ou ajuste o prazo.
+    </div>
+    <div class="actions" style="flex-wrap:wrap;gap:6px">
+      <button data-extend="${g.id}">+1 mês de prazo</button>
+      <input type="date" data-quick-deadline="${g.id}" style="padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:inherit;font:inherit" title="Definir nova data exata">
+      <button class="primary" data-apply-deadline="${g.id}">Aplicar nova data</button>
+    </div>
+  `;
+  })() : '';
+
+  // Aviso de meta em risco
+  const atRiskBlock = (opts.report && atRisk) ? (() => {
+    const dl = daysUntilDeadline(g);
+    return `
+      <div class="small" style="margin-top:8px">
+        <span class="risk-badge">⏰ faltam ${dl} dia(s), você está em ${p.percent}%</span>
+      </div>`;
+  })() : '';
+
+  // Motivo (se Não feita)
+  const reasonBlock = (opts.report && g.outcome === 'failed') ? `
+    <div class="fail-reason">
+      <strong>Motivo:</strong> ${escapeHtml(g.failReason || '(sem motivo informado)')}
+      <button class="iconbtn" data-edit-reason="${g.id}" style="margin-left:8px">editar motivo</button>
+    </div>
+  ` : '';
+
+  // Lançamento manual (varia por modo)
+  const manualBlock = showManualUI ? (isSnapshot ? `
+    <div class="actions">
+      <input class="miniInput" type="number" step="0.1" placeholder="valor" data-snapshot-input="${g.id}">
+      <button class="primary" data-update-snapshot="${g.id}">Registrar valor de hoje</button>
+    </div>
+  ` : `
+    <div class="actions">
+      <button data-plus-one="${g.id}">+1</button>
+      <input class="miniInput" type="number" min="1" placeholder="qtd" data-progress-input="${g.id}">
+      <button class="primary" data-add-progress="${g.id}">Registrar</button>
+    </div>
+  `) : '';
+
+  // Botão de timeline
+  const timelineToggle = `
+    <button class="ghost" data-toggle-timeline="${g.id}" style="margin-top:8px;font-size:.8rem">
+      ver lançamentos
+    </button>
+  `;
+
+  d.innerHTML = `
+    <div class="between">
+      <div style="flex:1;min-width:0">
+        <strong>${escapeHtml(g.name)}</strong>
+        <div class="small">
+          ${isSnapshot ? '' : (p.done + ' de ' + p.target + ' ' + escapeHtml(g.unit || '') + ' · ' + p.percent + '%')}
+          ${isSnapshot ? p.percent + '% do caminho' : ''}
+          ${sub.length ? ' · ' + sub.join(' · ') : ''}
+        </div>
+      </div>
+      <div class="row">
+        <span class="${badgeCls}">${badgeText}</span>
+        <button class="iconbtn" data-edit-goal="${g.id}" title="editar">✎</button>
+        <button class="iconbtn" data-del-goal="${g.id}" title="apagar">×</button>
+      </div>
+    </div>
+
+    <div class="bar" style="margin-top:10px"><div class="fill ${fillCls}" style="width:${p.percent}%"></div></div>
+    <div class="small" style="margin-top:6px">
+      ${isSnapshot ? 'Valor atual (substitui a cada registro)' :
+        (hasLinked ? p.linkedCount + ' rotina(s) vinculada(s)' : 'Sem rotina vinculada — registre progresso manual')}
+      ${g.baseline ? ' · baseline ' + g.baseline : ''}
+    </div>
+
+    ${snapshotBlock}
+    ${manualBlock}
+    ${statusBlock}
+    ${overdueBlock}
+    ${atRiskBlock}
+    ${reasonBlock}
+
+    ${timelineToggle}
+    <div class="timeline" data-timeline="${g.id}" style="display:none"></div>
+
+    <div class="edit-form" data-edit-form="${g.id}" style="display:none">
+      <div class="small"><strong>Editar meta</strong></div>
+      <input data-edit-name placeholder="Nome" value="${escapeHtml(g.name)}">
+      <div class="row">
+        <input data-edit-target type="number" placeholder="alvo" value="${g.target}">
+        <input data-edit-unit placeholder="unidade" value="${escapeHtml(g.unit || '')}">
+      </div>
+      <div class="row">
+        <select data-edit-mode>
+          <option value="sum" ${g.entryMode !== 'snapshot' ? 'selected' : ''}>Acumular (soma os lançamentos)</option>
+          <option value="snapshot" ${g.entryMode === 'snapshot' ? 'selected' : ''}>Valor atual (peso, medidas)</option>
+        </select>
+      </div>
+      <div class="row">
+        <input data-edit-startvalue type="number" placeholder="valor inicial (modo snapshot)" value="${g.startValue != null ? g.startValue : ''}">
+        <input data-edit-baseline type="number" min="0" placeholder="baseline (modo soma)" value="${g.baseline || 0}">
+      </div>
+      <div class="row">
+        <label class="small" style="flex:1;display:flex;flex-direction:column;gap:4px">
+          <span style="opacity:.75">📅 Nova data de vencimento (opcional)</span>
+          <input data-edit-deadline type="date" value="${g.deadline || ''}" style="width:100%">
+        </label>
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="ghost" data-cancel-edit="${g.id}">Cancelar</button>
+        <button class="primary" data-save-goal="${g.id}">Salvar</button>
+      </div>
+    </div>
+  `;
+  return d;
+}
+
+function escapeHtml(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function renderToday(){
+  const box = $('todayList');
+  const date = $('todayDate').value || iso(today);
+  $('todayDate').value = date;
+
+  // Fix 4 — exibe dia da semana
+  const DAYS_FULL = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const dow = new Date(date + 'T00:00:00').getDay();
+  const isToday = date === iso(today);
+  const dowEl = $('todayDow');
+  if(dowEl) dowEl.textContent = isToday ? 'Hoje · ' + DAYS_FULL[dow] : DAYS_FULL[dow];
+
+  box.innerHTML = '';
+  // recurringFor agora retorna {routine, slot, slotIndex, dow}
+  const recOccurrences = recurringFor(date).map(o => ({
+    kind: 'rec',
+    time: o.slot.start || '99:99',
+    data: o
+  }));
+  const events = eventsFor(date).map(e => ({
+    kind: 'ev',
+    time: e.time || '99:99',
+    data: e
+  }));
+  const tasks = tasksFor(date).map(t => ({
+    kind: 'task',
+    time: t.time || '99:99',
+    data: t
+  }));
+  const items = [...recOccurrences, ...events, ...tasks]
+    .sort((a,b) => a.time.localeCompare(b.time));
+
+  if(!items.length){
+    box.innerHTML = `<div class="item muted" style="text-align:center;padding:28px 16px;line-height:1.8">
+      🌿<br><strong style="color:var(--txt);opacity:.8">Nenhuma atividade neste dia</strong><br>
+      <span style="font-size:.82rem">Use o Planejamento para adicionar rotinas,<br>eventos ou atividades únicas.</span>
+    </div>`;
+    return;
+  }
+
+  items.forEach(it => {
+    if(it.kind === 'rec'){
+      const occ = it.data;
+      const r = occ.routine;
+      const slot = occ.slot;
+      const s = status(date, r.id);
+      const c = s === 'done' ? 'done' : s === 'missed' ? 'missed' : s === 'canceled' ? 'canceled' : '';
+      const goal = r.goalId ? state.goals.find(g => g.id === r.goalId) : null;
+
+      // Faixa de categoria (se a rotina tem meta vinculada)
+      const catColor = goal ? categoryColor(goal.category) : null;
+
+      const d = document.createElement('div');
+      d.className = 'item task prio-' + (r.priority || 'medium') + ' ' + c;
+      if(goal && goal.category){
+        d.setAttribute('data-cat', goal.category);
+        if(catColor) d.style.setProperty('--cat-color', catColor);
+      }
+      // Registrar quantidade direto na rotina (apenas se vinculada a meta sum, ativa)
+      const canRegisterQty = goal && goal.entryMode !== 'snapshot'
+        && goal.status !== 'archived' && goal.outcome !== 'canceled' && goal.outcome !== 'done';
+      const qtyBlock = canRegisterQty ? `
+        <div class="actions" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)">
+          <span class="small" style="width:100%;margin-bottom:4px">Registrar progresso em "${escapeHtml(goal.name)}"</span>
+          <button data-today-plus="${r.goalId}" data-today-date="${date}">+1</button>
+          <input class="miniInput" type="number" min="1" placeholder="qtd ${escapeHtml(goal.unit || '')}" data-today-progress-input="${r.goalId}">
+          <button class="primary" data-today-add-progress="${r.goalId}" data-today-date="${date}">Registrar</button>
+        </div>` : '';
+      d.innerHTML = `
+        <div class="between">
+          <div style="flex:1;min-width:0">
+            <strong>${escapeHtml(r.title)}</strong>
+            <div class="small">${slot.start || ''}${slot.end ? ' - ' + slot.end : ''}${goal ? ' · meta: ' + escapeHtml(goal.name) : ''}</div>
+          </div>
+          <div class="row">
+            <span class="pbad p-${r.priority || 'medium'}">${prioPt(r.priority || 'medium')}</span>
+            <button class="iconbtn" data-edit-time="${r.id}" title="editar horário">⏱</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <label><input type="radio" name="s-${r.id}" value="done" ${s === 'done' ? 'checked' : ''}> Feita</label>
+          <label><input type="radio" name="s-${r.id}" value="missed" ${s === 'missed' ? 'checked' : ''}> Não fiz</label>
+          <label><input type="radio" name="s-${r.id}" value="canceled" ${s === 'canceled' ? 'checked' : ''}> Cancelada</label>
+          <label><input type="radio" name="s-${r.id}" value="pending" ${s === 'pending' ? 'checked' : ''}> Pendente</label>
+        </div>
+        ${qtyBlock}
+        <div class="time-edit" data-time-edit="${r.id}" style="display:none">
+          <span class="small">Novo horário (${WD[dow]}):</span>
+          <input type="time" data-new-start value="${slot.start || ''}">
+          <input type="time" data-new-end value="${slot.end || ''}">
+          <button class="primary" data-save-time="${r.id}">Salvar</button>
+          <button class="ghost" data-cancel-time="${r.id}">Cancelar</button>
+        </div>`;
+      box.appendChild(d);
+    } else if(it.kind === 'ev'){
+      const e = it.data;
+      const d = document.createElement('div');
+      d.className = 'item task prio-' + (e.priority || 'medium');
+      const timeStr = fmtTimeRange(e.time, e.endTime);
+      d.innerHTML = `
+        <div class="between">
+          <div style="flex:1;min-width:0">
+            <strong>${escapeHtml(e.title)}</strong>
+            <div class="small">${e.date}${timeStr ? ' · ' + timeStr : ''}</div>
+          </div>
+          <div class="row" style="gap:4px">
+            <span class="label">Evento</span>
+            <button class="iconbtn" data-edit-ev="${e.id}" title="editar">✏️</button>
+            <button class="iconbtn" data-del-ev="${e.id}" title="excluir" style="color:#c44536">🗑</button>
+          </div>
+        </div>
+        <div class="time-edit" data-ev-edit="${e.id}" style="display:none;flex-direction:column;gap:8px;margin-top:10px">
+          <input type="text" data-ev-title value="${escapeHtml(e.title)}" placeholder="Título" style="width:100%">
+          <div class="row" style="gap:6px">
+            <input type="date" data-ev-date value="${e.date}" style="flex:1">
+            <input type="time" data-ev-time value="${e.time || ''}" style="flex:1" title="Início">
+            <input type="time" data-ev-endtime value="${e.endTime || ''}" style="flex:1" title="Término">
+          </div>
+          <select data-ev-priority style="padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:inherit;font-size:.85rem">
+            <option value="low" ${e.priority==='low'?'selected':''}>Baixa</option>
+            <option value="medium" ${!e.priority||e.priority==='medium'?'selected':''}>Média</option>
+            <option value="high" ${e.priority==='high'?'selected':''}>Alta</option>
+          </select>
+          <div class="row" style="gap:6px">
+            <button class="primary" data-ev-save="${e.id}" style="flex:1">Salvar</button>
+            <button class="ghost" data-ev-cancel="${e.id}" style="flex:1">Cancelar</button>
+          </div>
+        </div>`;
+      box.appendChild(d);
+    } else if(it.kind === 'task'){
+      const t = it.data;
+      const s = status(date, 'task:' + t.id);
+      const c = s === 'done' ? 'done' : s === 'missed' ? 'missed' : s === 'canceled' ? 'canceled' : '';
+      const d = document.createElement('div');
+      d.className = 'item task prio-' + (t.priority || 'medium') + ' ' + c;
+      const timeStr = fmtTimeRange(t.time, t.endTime);
+      d.innerHTML = `
+        <div class="between">
+          <div style="flex:1;min-width:0">
+            <strong>✦ ${escapeHtml(t.title)}</strong>
+            <div class="small">${timeStr || 'Sem horário específico'}</div>
+          </div>
+          <div class="row" style="gap:4px">
+            <span class="pbad p-${t.priority || 'medium'}">${prioPt(t.priority || 'medium')}</span>
+            <button class="iconbtn" data-edit-task="${t.id}" title="editar">✏️</button>
+            <button class="iconbtn" data-del-task="${t.id}" title="excluir" style="color:#c44536">🗑</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <label><input type="radio" name="task-${t.id}" value="done" ${s === 'done' ? 'checked' : ''}> Feita</label>
+          <label><input type="radio" name="task-${t.id}" value="missed" ${s === 'missed' ? 'checked' : ''}> Não fiz</label>
+          <label><input type="radio" name="task-${t.id}" value="canceled" ${s === 'canceled' ? 'checked' : ''}> Cancelada</label>
+          <label><input type="radio" name="task-${t.id}" value="pending" ${s === 'pending' ? 'checked' : ''}> Pendente</label>
+        </div>
+        <div class="time-edit" data-task-edit="${t.id}" style="display:none;flex-direction:column;gap:8px;margin-top:10px">
+          <input type="text" data-task-title value="${escapeHtml(t.title)}" placeholder="Título" style="width:100%">
+          <div class="row" style="gap:6px">
+            <input type="date" data-task-date value="${t.date}" style="flex:1">
+            <input type="time" data-task-time value="${t.time || ''}" style="flex:1" title="Início">
+            <input type="time" data-task-endtime value="${t.endTime || ''}" style="flex:1" title="Término">
+          </div>
+          <select data-task-priority style="padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:inherit;font-size:.85rem">
+            <option value="low" ${t.priority==='low'?'selected':''}>Baixa</option>
+            <option value="medium" ${!t.priority||t.priority==='medium'?'selected':''}>Média</option>
+            <option value="high" ${t.priority==='high'?'selected':''}>Alta</option>
+          </select>
+          <div class="row" style="gap:6px">
+            <button class="primary" data-task-save="${t.id}" style="flex:1">Salvar</button>
+            <button class="ghost" data-task-cancel="${t.id}" style="flex:1">Cancelar</button>
+          </div>
+        </div>`;
+      box.appendChild(d);
+    }
+  });
+
+  // Wire status (Feita / Não fiz / Cancelada / Pendente) — Fix 10: só re-renderiza abas afetadas
+  box.querySelectorAll('input[type=radio]').forEach(i => i.onchange = () => {
+    const name = i.name;
+    let id;
+    if(name.startsWith('task-')){
+      id = 'task:' + name.slice(5);
+    } else {
+      id = name.slice(2);
+    }
+    setStatus(date, id, i.value);
+    save();
+    // Atualiza visual do item sem re-renderizar tudo
+    const item = i.closest('.item');
+    if(item){
+      item.classList.remove('done','missed','canceled');
+      if(i.value !== 'pending') item.classList.add(i.value);
+    }
+    renderReport();
+    stats();
+  });
+
+  // Wire edição de horário inline
+  box.querySelectorAll('[data-edit-time]').forEach(b => b.onclick = () => {
+    const id = b.dataset.editTime;
+    const form = box.querySelector('[data-time-edit="' + id + '"]');
+    if(form) form.style.display = (form.style.display === 'flex') ? 'none' : 'flex';
+  });
+  box.querySelectorAll('[data-cancel-time]').forEach(b => b.onclick = () => {
+    const id = b.dataset.cancelTime;
+    const form = box.querySelector('[data-time-edit="' + id + '"]');
+    if(form) form.style.display = 'none';
+  });
+  box.querySelectorAll('[data-save-time]').forEach(b => b.onclick = () => {
+    const id = b.dataset.saveTime;
+    const form = box.querySelector('[data-time-edit="' + id + '"]');
+    if(!form) return;
+    const ns = form.querySelector('[data-new-start]').value;
+    const ne = form.querySelector('[data-new-end]').value;
+    if(!ns){ showToast('Informe o horário de início'); return; }
+    editRoutineSlot(id, dow, ns, ne);
+  });
+
+  // Wire registro de quantidade direto no Hoje (atalho para o Relatório)
+  box.querySelectorAll('[data-today-plus]').forEach(b => b.onclick = () => {
+    logManualProgress(b.dataset.todayPlus, 1, b.dataset.todayDate);
+    renderToday();
+    renderReport();
+  });
+  box.querySelectorAll('[data-today-add-progress]').forEach(b => b.onclick = () => {
+    const gid = b.dataset.todayAddProgress;
+    const dt = b.dataset.todayDate;
+    const input = box.querySelector('[data-today-progress-input="' + gid + '"]');
+    const v = Number(input.value);
+    if(!Number.isFinite(v) || v <= 0){ showToast('Informe um valor válido'); return; }
+    logManualProgress(gid, v, dt);
+    input.value = '';
+    renderToday();
+    renderReport();
+  });
+
+  // Wire editar evento
+  box.querySelectorAll('[data-edit-ev]').forEach(b => b.onclick = () => {
+    const form = box.querySelector('[data-ev-edit="' + b.dataset.editEv + '"]');
+    if(form) form.style.display = (form.style.display === 'flex') ? 'none' : 'flex';
+  });
+  box.querySelectorAll('[data-ev-cancel]').forEach(b => b.onclick = () => {
+    box.querySelector('[data-ev-edit="' + b.dataset.evCancel + '"]').style.display = 'none';
+  });
+  box.querySelectorAll('[data-ev-save]').forEach(b => b.onclick = () => {
+    const id = b.dataset.evSave;
+    const form = box.querySelector('[data-ev-edit="' + id + '"]');
+    const title = form.querySelector('[data-ev-title]').value.trim();
+    const newDate = form.querySelector('[data-ev-date]').value;
+    const time = form.querySelector('[data-ev-time]').value;
+    const endTime = form.querySelector('[data-ev-endtime]').value;
+    const priority = form.querySelector('[data-ev-priority]').value;
+    if(!title){ showToast('Informe o título'); return; }
+    const ev = state.events.find(e => e.id === id);
+    if(ev){ ev.title = title; ev.date = newDate; ev.time = time; ev.endTime = endTime; ev.priority = priority; }
+    save(); renderToday(); renderWeek(); renderMonth(); renderPlan(); showToast('✓ Evento atualizado');
+  });
+  box.querySelectorAll('[data-del-ev]').forEach(b => b.onclick = async () => {
+    const ok = await showConfirm('Excluir este evento?', { label:'Excluir', danger:true });
+    if(!ok) return;
+    state.events = state.events.filter(e => e.id !== b.dataset.delEv);
+    save(); renderToday(); renderWeek(); renderMonth(); showToast('Evento excluído');
+  });
+
+  // Wire editar atividade única
+  box.querySelectorAll('[data-edit-task]').forEach(b => b.onclick = () => {
+    const form = box.querySelector('[data-task-edit="' + b.dataset.editTask + '"]');
+    if(form) form.style.display = (form.style.display === 'flex') ? 'none' : 'flex';
+  });
+  box.querySelectorAll('[data-task-cancel]').forEach(b => b.onclick = () => {
+    box.querySelector('[data-task-edit="' + b.dataset.taskCancel + '"]').style.display = 'none';
+  });
+  box.querySelectorAll('[data-task-save]').forEach(b => b.onclick = () => {
+    const id = b.dataset.taskSave;
+    const form = box.querySelector('[data-task-edit="' + id + '"]');
+    const title = form.querySelector('[data-task-title]').value.trim();
+    const newDate = form.querySelector('[data-task-date]').value;
+    const time = form.querySelector('[data-task-time]').value;
+    const endTime = form.querySelector('[data-task-endtime]').value;
+    const priority = form.querySelector('[data-task-priority]').value;
+    if(!title){ showToast('Informe o título'); return; }
+    const tk = state.specificDateTasks.find(t => t.id === id);
+    if(tk){ tk.title = title; tk.date = newDate; tk.time = time; tk.endTime = endTime; tk.priority = priority; }
+    save(); renderToday(); renderWeek(); renderMonth(); renderPlan(); showToast('✓ Atividade atualizada');
+  });
+  box.querySelectorAll('[data-del-task]').forEach(b => b.onclick = async () => {
+    const ok = await showConfirm('Excluir esta atividade?', { label:'Excluir', danger:true });
+    if(!ok) return;
+    state.specificDateTasks = state.specificDateTasks.filter(t => t.id !== b.dataset.delTask);
+    save(); renderToday(); renderWeek(); renderMonth(); showToast('Atividade excluída');
+  });
+}
+
+function renderWeek(){
+  const box = $('weekList');
+  box.innerHTML = '';
+  const start = new Date(weekRef);
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  start.setHours(0,0,0,0);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  $('weekTitle').textContent =
+    start.toLocaleDateString('pt-BR',{ day:'2-digit', month:'2-digit' }) +
+    ' – ' +
+    end.toLocaleDateString('pt-BR',{ day:'2-digit', month:'2-digit' });
+
+  for(let i = 0; i < 7; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const ds = iso(d);
+    const items = [
+      ...recurringFor(ds).map(o => ({
+        time: o.slot.start || '',
+        label: (o.slot.start ? o.slot.start + (o.slot.end ? ' – ' + o.slot.end : '') + ' · ' : '') + o.routine.title
+      })),
+      ...eventsFor(ds).map(e => ({ time: e.time || '', label: (fmtTimeRange(e.time, e.endTime) ? fmtTimeRange(e.time, e.endTime) + ' · ' : '') + e.title })),
+      ...tasksFor(ds).map(t => ({ time: t.time || '', label: (fmtTimeRange(t.time, t.endTime) ? fmtTimeRange(t.time, t.endTime) + ' · ' : '') + '✦ ' + t.title }))
+    ].sort((a,b) => {
+      if(!a.time && !b.time) return 0;
+      if(!a.time) return 1;
+      if(!b.time) return -1;
+      return a.time.localeCompare(b.time);
+    });
+    const m=[],t=[],n=[];
+    items.forEach(x => {
+      const h = parseInt(x.time.split(':')[0],10);
+      (h < 12 ? m : (h < 18 ? t : n)).push(escapeHtml(x.label));
+    });
+    const card = document.createElement('div');
+    card.className = 'week-day';
+    card.innerHTML = `
+      <div class="between">
+        <strong>${WD[d.getDay()]} ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</strong>
+        <span class="small">${items.length} itens</span>
+      </div>
+      <div class="week-col small" style="margin-top:10px">
+        <div><strong>Manhã</strong><br>${m.join('<br>') || '—'}</div>
+        <div><strong>Tarde</strong><br>${t.join('<br>') || '—'}</div>
+        <div><strong>Noite</strong><br>${n.join('<br>') || '—'}</div>
+      </div>`;
+    box.appendChild(card);
+  }
+}
+
+function renderMonth(){
+  const box = $('calendar');
+  box.innerHTML = '';
+  $('monthTitle').textContent = MONTHS[curM] + ' ' + curY;
+
+  // Cabeçalho dos dias da semana — usa abreviação de 1 char em telas < 400px
+  const isTiny = window.innerWidth < 400;
+  WD.forEach(w => {
+    const x = document.createElement('div');
+    x.className = 'cal-header small';
+    x.textContent = isTiny ? w[0] : w;   // 'D','S','T'… em telas muito pequenas
+    box.appendChild(x);
+  });
+
+  const first = new Date(curY, curM, 1);
+  const startDow = first.getDay();
+  const days = new Date(curY, curM+1, 0).getDate();
+  const prev = new Date(curY, curM, 0).getDate();
+  const isCompact = window.innerWidth < 600;
+
+  for(let i = 0; i < 42; i++){
+    const n = i - startDow + 1;
+    let d, other = false;
+    if(n < 1){ d = new Date(curY, curM-1, prev + n); other = true; }
+    else if(n > days){ d = new Date(curY, curM+1, n - days); other = true; }
+    else d = new Date(curY, curM, n);
+    const ds = iso(d);
+    const recs = recurringFor(ds);
+    const evts = eventsFor(ds);
+    const tasks = tasksFor(ds);
+    const items = recs.length + evts.length + tasks.length;
+    const cell = document.createElement('div');
+    cell.className = 'day' + (other ? ' other' : '') + (ds === iso(today) ? ' today' : '');
+
+    if(isCompact){
+      // Modo compacto: só número + bolinha de contagem
+      cell.innerHTML = `
+        <strong style="display:block;line-height:1.4">${d.getDate()}</strong>
+        ${items ? `<span class="small" style="font-size:.65rem">${items}✦</span>` : ''}`;
+    } else {
+      cell.innerHTML = `
+        <div class="between"><strong>${d.getDate()}</strong><span class="small">${items}</span></div>
+        <div class="small">${
+          [...recs.slice(0,2).map(o => escapeHtml(o.routine.title)),
+           ...evts.slice(0,2).map(e => escapeHtml(e.title)),
+           ...tasks.slice(0,2).map(t => '✦ ' + escapeHtml(t.title))].join('<br>') || 'Livre'
+        }</div>`;
+    }
+    cell.onclick = () => { $('todayDate').value = ds; show('today'); renderToday(); };
+    box.appendChild(cell);
+  }
+}
+
+/* Filtro ativo do relatório (controlado pelos chips na UI). */
+let currentFilter = 'all';
+
+function renderReport(){
+  const box = $('reportList');
+  box.innerHTML = '';
+  if(!state.goals.length){
+    box.innerHTML = '<div class="item muted">Cadastre metas (ou importe sua planilha) para ter um relatório consolidado.</div>';
+    return;
+  }
+
+  // Aplica filtro
+  const filtered = state.goals.filter(g => {
+    if(currentFilter === 'all') return true;
+    return effectiveStatus(g) === currentFilter;
+  });
+
+  if(!filtered.length){
+    box.innerHTML = '<div class="item muted">Nenhuma meta corresponde ao filtro selecionado.</div>';
+    return;
+  }
+
+  // Agrupa por mês.
+  const groups = {};
+  const SEM_MES = '__sem_mes__';
+  for(const g of filtered){
+    if(g.month && g.year){
+      const idx = MONTHS.indexOf(g.month);
+      const key = idx >= 0 ? `${g.year}-${String(idx).padStart(2,'0')}` : SEM_MES;
+      (groups[key] = groups[key] || []).push(g);
+    } else {
+      (groups[SEM_MES] = groups[SEM_MES] || []).push(g);
+    }
+  }
+
+  const orderedKeys = Object.keys(groups).filter(k => k !== SEM_MES).sort();
+  if(groups[SEM_MES]) orderedKeys.push(SEM_MES);
+
+  for(const key of orderedKeys){
+    const goals = groups[key];
+
+    // Ordena: vencidas → em risco → ativas → finalizadas
+    goals.sort((a,b) => {
+      const rank = g => {
+        const e = effectiveStatus(g);
+        return e === 'overdue' ? 0 : e === 'at-risk' ? 1 : e === 'active' ? 2 : 3;
+      };
+      const ra = rank(a), rb = rank(b);
+      if(ra !== rb) return ra - rb;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    let label;
+    if(key === SEM_MES){
+      label = 'Sem mês definido';
+    } else {
+      const [y, m] = key.split('-');
+      label = MONTHS[Number(m)] + ' / ' + y;
+    }
+    const counts = {
+      done: goals.filter(g => effectiveStatus(g) === 'done').length,
+      failed: goals.filter(g => effectiveStatus(g) === 'failed').length,
+      overdue: goals.filter(g => effectiveStatus(g) === 'overdue').length,
+      atRisk: goals.filter(g => effectiveStatus(g) === 'at-risk').length,
+      active: goals.filter(g => effectiveStatus(g) === 'active').length
+    };
+    const summary = [];
+    if(counts.done) summary.push(counts.done + ' concluídas');
+    if(counts.active) summary.push(counts.active + ' em andamento');
+    if(counts.atRisk) summary.push(counts.atRisk + ' em risco');
+    if(counts.overdue) summary.push(counts.overdue + ' vencidas');
+    if(counts.failed) summary.push(counts.failed + ' não feitas');
+
+    const head = document.createElement('div');
+    head.className = 'month-head';
+    head.innerHTML = `<h3>${escapeHtml(label)}</h3>
+      <span class="count">${goals.length} meta(s)${summary.length ? ' · ' + summary.join(' · ') : ''}</span>`;
+    box.appendChild(head);
+
+    for(const goal of goals){
+      box.appendChild(renderGoalCard(goal, { report: true }));
+    }
+  }
+
+  wireGoalCardEvents(box);
+}
+
+function renderWidget(){
+  let widgetDate = $('widgetDate').value;
+  if(!widgetDate) widgetDate = iso(new Date());
+  $('widgetDate').value = widgetDate;
+
+  const dateObj = new Date(widgetDate + 'T00:00:00');
+  const recs = recurringFor(widgetDate);
+  const events = eventsFor(widgetDate);
+  const tasks = tasksFor(widgetDate);
+
+  const items = [
+    ...recs.map(o => ({kind:'rec', time:o.slot.start||'99:99', data:o})),
+    ...events.map(e => ({kind:'ev', time:e.time||'99:99', data:e})),
+    ...tasks.map(t => ({kind:'task', time:t.time||'99:99', data:t}))
+  ].sort((a,b) => a.time.localeCompare(b.time));
+
+  let nDone=0, nMissed=0, nPending=0;
+  items.forEach(it => {
+    let sid;
+    if(it.kind==='rec') sid = it.data.routine.id;
+    else if(it.kind==='task') sid = 'task:' + it.data.data?.id;
+    else sid = null;
+    if(!sid) return;
+    const s = getStatus(widgetDate, sid);
+    if(s==='done') nDone++;
+    else if(s==='missed'||s==='canceled') nMissed++;
+    else nPending++;
+  });
+
+  const sumDiv = $('widgetSummary');
+  sumDiv.innerHTML = '';
+  if(items.length){
+    if(nDone) sumDiv.innerHTML += `<span class="chip c-done">✓ ${nDone}</span>`;
+    if(nMissed) sumDiv.innerHTML += `<span class="chip c-missed">✗ ${nMissed}</span>`;
+    if(nPending) sumDiv.innerHTML += `<span class="chip c-pending">● ${nPending}</span>`;
+  }
+
+  const list = $('widgetList');
+  if(!items.length){
+    list.innerHTML = `<div class="item muted" style="text-align:center;padding:40px 20px">🌿<br>Nenhuma atividade para ${fmtDate(widgetDate)}.</div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  items.forEach(it => {
+    const el = document.createElement('div');
+    if(it.kind==='ev'){
+      const e = it.data;
+      el.className = 'item prio-' + (e.priority||'medium');
+      const timeStr = fmtTimeRange(e.time, e.endTime);
+      el.innerHTML = `
+        <div class="between">
+          <div style="flex:1">
+            <strong>${escapeHtml(e.title)}</strong>
+            <div class="small">${timeStr || ''}</div>
+          </div>
+          <span class="label">📅</span>
+        </div>`;
+    } else if(it.kind==='task'){
+      const t = it.data;
+      const s = getStatus(widgetDate, 'task:' + t.id);
+      const c = s==='done'?'done':s==='missed'?'missed':s==='canceled'?'canceled':'';
+      el.className = 'item task prio-' + (t.priority||'medium') + ' ' + c;
+      const timeStr = fmtTimeRange(t.time, t.endTime);
+      el.innerHTML = `
+        <div class="between">
+          <div style="flex:1">
+            <strong>✦ ${escapeHtml(t.title)}</strong>
+            <div class="small">${timeStr || '—'}</div>
+          </div>
+          <span class="pbad p-${t.priority||'medium'}">${prioPt(t.priority||'medium')}</span>
+          <label><input type="radio" name="wt-${t.id}" value="missed" ${s==='missed'?'checked':''} data-widget-task="${t.id}" data-widget-date="${widgetDate}"> Não fiz</label>
+          <label><input type="radio" name="wt-${t.id}" value="canceled" ${s==='canceled'?'checked':''} data-widget-task="${t.id}" data-widget-date="${widgetDate}"> Cancelada</label>
+          <label><input type="radio" name="wt-${t.id}" value="pending" ${s==='pending'?'checked':''} data-widget-task="${t.id}" data-widget-date="${widgetDate}"> Pendente</label>
+        </div>`;
+    } else {
+      const o = it.data;
+      const r = o.routine;
+      const s = getStatus(widgetDate, r.id);
+      const c = s==='done'?'done':s==='missed'?'missed':s==='canceled'?'canceled':'';
+      el.className = 'item task prio-' + (r.priority||'medium') + ' ' + c;
+      el.innerHTML = `
+        <div class="between">
+          <div style="flex:1;min-width:0">
+            <strong>${escapeHtml(r.title)}</strong>
+            <div class="small">${o.slot.start||''}${o.slot.end?' - '+o.slot.end:''}</div>
+          </div>
+          <span class="pbad p-${r.priority||'medium'}">${prioPt(r.priority||'medium')}</span>
+          <label><input type="radio" name="wr-${r.id}" value="missed" ${s==='missed'?'checked':''} data-widget-routine="${r.id}" data-widget-date="${widgetDate}"> Não fiz</label>
+          <label><input type="radio" name="wr-${r.id}" value="canceled" ${s==='canceled'?'checked':''} data-widget-routine="${r.id}" data-widget-date="${widgetDate}"> Cancelada</label>
+          <label><input type="radio" name="wr-${r.id}" value="pending" ${s==='pending'?'checked':''} data-widget-routine="${r.id}" data-widget-date="${widgetDate}"> Pendente</label>
+        </div>`;
+    }
+    list.appendChild(el);
+  });
+
+  // Wire radios
+  list.querySelectorAll('input[type=radio][data-widget-routine]').forEach(radio => {
+    radio.onchange = () => {
+      setStatus(radio.dataset.widgetDate, radio.dataset.widgetRoutine, radio.value);
+      save();
+      renderWidget();
+      renderToday();
+      renderReport();
+    };
+  });
+  list.querySelectorAll('input[type=radio][data-widget-task]').forEach(radio => {
+    radio.onchange = () => {
+      setStatus(radio.dataset.widgetDate, 'task:' + radio.dataset.widgetTask, radio.value);
+      save();
+      renderWidget();
+      renderToday();
+      renderReport();
+    };
+  });
+}
+
+function stats(){
+  const active = state.goals.filter(g => g.status !== 'archived');
+  $('mGoals').textContent = active.length;
+  $('mDays').textContent = Object.keys(state.entries)
+    .filter(d => Object.keys(state.entries[d] || {}).length).length;
+  // Eventos + Atividades do mês corrente
+  $('mEvents').textContent = (state.events.filter(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d.getMonth() === curM && d.getFullYear() === curY;
+  }).length + (state.specificDateTasks || []).filter(t => {
+    const d = new Date(t.date + 'T00:00:00');
+    return d.getMonth() === curM && d.getFullYear() === curY;
+  }).length);
+  // Progresso médio das ativas (mesma fonte)
+  $('mProgress').textContent = active.length
+    ? Math.round(active.reduce((a,g) => a + progressOf(g).percent, 0) / active.length) + '%'
+    : '0%';
+}
+
+function renderAll(){
+  renderPlan();
+  renderToday();
+  renderWeek();
+  renderMonth();
+  renderReport();
+  stats();
+}
+
+function show(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = $('view-' + name);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.body.classList.remove('tab-plan','tab-today','tab-week','tab-month','tab-report','tab-settings','tab-widget');
+  document.body.classList.add('tab-' + name);
+  if(name === 'settings') refreshSettings();
+  if(name === 'widget') renderWidget();
+}
+
+/* ============================================================
+   Wiring
+   ============================================================ */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => show(t.dataset.tab));
+$('addGoal').onclick = addGoal;
+$('addEvent').onclick = addEvent;
+$('addTask').onclick = addTask;
+$('addRec').onclick = addRec;
+
+// Mostra/esconde campo "valor inicial" conforme o tipo de meta
+$('goalEntryMode').onchange = e => {
+  $('snapshotStartRow').style.display = (e.target.value === 'snapshot') ? 'flex' : 'none';
+};
+
+$('prevMonth').onclick = () => { curM--; if(curM < 0){ curM = 11; curY--; } renderAll(); };
+$('nextMonth').onclick = () => { curM++; if(curM > 11){ curM = 0; curY++; } renderAll(); };
+$('prevWeek').onclick  = () => { weekRef = new Date(weekRef); weekRef.setDate(weekRef.getDate() - 7); renderWeek(); };
+$('nextWeek').onclick  = () => { weekRef = new Date(weekRef); weekRef.setDate(weekRef.getDate() + 7); renderWeek(); };
+
+// Filtros do relatório (chips)
+document.querySelectorAll('#reportFilters .filter-chip').forEach(chip => {
+  chip.onclick = () => {
+    currentFilter = chip.dataset.filter;
+    document.querySelectorAll('#reportFilters .filter-chip').forEach(c =>
+      c.classList.toggle('active', c === chip));
+    renderReport();
+  };
+});
+
+$('seed').onclick = () => {
+  const now = new Date().toISOString();
+  state.goals = [
+    { id: uuid(), name:'Ler 400 páginas', type:'pages', target:400, unit:'páginas',
+      baseline:0, status:'active', source:'manual', entryMode:'sum', startValue:null,
+      outcome:'pending', failReason:'', deadlineExtensions:0,
+      createdAt:now, updatedAt:now },
+    { id: uuid(), name:'Treinos muay thai', type:'count', target:12, unit:'treinos',
+      baseline:0, status:'active', source:'manual', entryMode:'sum', startValue:null,
+      outcome:'pending', failReason:'', deadlineExtensions:0,
+      createdAt:now, updatedAt:now },
+    { id: uuid(), name:'Chegar aos 80kg', type:'count', target:80, unit:'kg',
+      baseline:0, status:'active', source:'manual', entryMode:'snapshot', startValue:88,
+      outcome:'pending', failReason:'', deadlineExtensions:0,
+      createdAt:now, updatedAt:now }
+  ];
+  state.events = [
+    { id: uuid(), title:'Viagem para RN', date: iso(today), time:'09:00', priority:'high' }
+  ];
+  state.specificDateTasks = [
+    { id: uuid(), title:'Fazer compras de mantimentos', date: iso(new Date(today.getTime() + 86400000)), time:'10:00', priority:'medium', createdAt:now },
+    { id: uuid(), title:'Dentista - checkup', date: iso(new Date(today.getTime() + 86400000*3)), time:'15:00', priority:'high', createdAt:now }
+  ];
+  const mtGoal = state.goals[1];
+  state.recurring = [
+    { id: uuid(), title:'Aula do mestrado', goalId:'', priority:'medium', increment:1,
+      schedule:[{ days:[2], start:'19:00', end:'21:30' }] },
+    { id: uuid(), title:'Treino de muay thai', goalId: mtGoal.id, priority:'medium', increment:1,
+      schedule:[{ days:[1,3,5], start:'18:00', end:'19:20' }] }
+  ];
+  state.entries = {};
+  save();
+  showToast('Dados de demo carregados');
+};
+
+/* ── Configurações (aba) ── */
+function openSettings(){
+  show('settings');
+  refreshSettings();
+}
+function refreshSettings(){
+  const u = currentUser() || '—';
+  $('setUser').textContent = u;
+  // Conta criada
+  const user = findUser(u);
+  $('setCreated').textContent = user && user.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '—';
+  // E-mail
+  $('setEmail').value = (user && user.email) ? user.email : '';
+  // Último backup
+  const last = state.meta && state.meta.lastBackup;
+  $('setLastBackup').textContent = last
+    ? new Date(last).toLocaleString('pt-BR') : 'Nunca';
+  // Sync
+  const syncTxt = hasSupabase() ? 'Configurada (Supabase)' : 'Não configurada';
+  $('setSyncStatus').textContent = syncTxt;
+  // Backup hint
+  const el = $('setBackupStatus');
+  if(!last){
+    el.innerHTML = '<span style="color:#f7c887">⚠ Nenhum backup feito ainda. Recomendado pelo menos 1x por semana.</span>';
+  } else {
+    const days = Math.floor((new Date() - new Date(last)) / 86400000);
+    if(days >= 7){
+      el.innerHTML = '<span style="color:#f7c887">⚠ Último backup há ' + days + ' dias.</span>';
+    } else {
+      el.textContent = 'Último backup: ' + (days === 0 ? 'há menos de 1 dia' : 'há ' + days + ' dia(s)') + '.';
+    }
+  }
+}
+
+function saveAccountEmail(){
+  const name = currentUser();
+  if(!name) return;
+  const email = ($('setEmail').value || '').trim().toLowerCase();
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showToast('E-mail inválido');
+    return;
+  }
+  const user = findUser(name);
+  if(!user) return;
+  user.email = email;
+  const users = listUsers().filter(u => u.name !== name);
+  users.push(user);
+  saveUsers(users);
+  if(hasSupabase()) supaUpsertUser(user).catch(e => console.warn('email supa:', e));
+  showToast(email ? 'E-mail salvo' : 'E-mail removido');
+}
+
+async function deleteCurrentAccount(){
+  const name = currentUser();
+  if(!name) return;
+  const ok = await showConfirm(
+    `Apagar a conta <strong>"${name}"</strong> e <strong>todos os seus dados</strong> deste dispositivo?<br><br>Esta ação não pode ser desfeita. Faça backup antes.`,
+    { label: 'Apagar conta', danger: true }
+  );
+  if(!ok) return;
+  saveUsers(listUsers().filter(u => u.name !== name));
+  localStorage.removeItem(stateKey(name));
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(CURRENT_KEY);
+  state = defaultState();
+  showLogin();
+  showToast('Conta "' + name + '" apagada deste dispositivo.');
+}
+
+$('settingsBtn').onclick = openSettings;
+$('setChangePassBtn').onclick = changePassword;
+$('setLogoutBtn').onclick = logout;
+$('setEmailSaveBtn').onclick = saveAccountEmail;
+$('setExportBtn').onclick = () => { exportBackup(); refreshSettings(); };
+$('setShareBtn').onclick = () => { shareBackup().then(refreshSettings); };
+$('setCopyBtn').onclick = copyBackup;
+$('setImportBtn').onclick = () => $('setImportFile').click();
+$('setImportFile').onchange = (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  $('setImportName').textContent = 'Arquivo: ' + file.name;
+  importBackup(file);
+  e.target.value = '';
+  setTimeout(refreshSettings, 500);
+};
+$('setDeleteAccBtn').onclick = deleteCurrentAccount;
+
+/* Widget Hoje */
+$('widgetPrev').onclick = () => {
+  const d = new Date($('widgetDate').value + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  $('widgetDate').value = iso(d);
+  renderWidget();
+};
+$('widgetNext').onclick = () => {
+  const d = new Date($('widgetDate').value + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  $('widgetDate').value = iso(d);
+  renderWidget();
+};
+$('widgetToday').onclick = () => {
+  $('widgetDate').value = iso(new Date());
+  renderWidget();
+};
+$('widgetDate').onchange = renderWidget;
+
+/* ── Widget Quick Add — formulários inline ── */
+function wfToggle(formId){
+  ['widgetFormTask','widgetFormEvent','widgetFormRec'].forEach(id => {
+    const el = $(id);
+    el.style.display = (id === formId && el.style.display !== 'flex') ? 'flex' : 'none';
+  });
+}
+$('widgetAddTask').onclick  = () => { wfToggle('widgetFormTask');  $('wfTaskTitle').focus(); };
+$('widgetAddEvent').onclick = () => { wfToggle('widgetFormEvent'); $('wfEventTitle').focus(); };
+$('widgetAddRec').onclick   = () => { wfToggle('widgetFormRec');   $('wfRecTitle').focus(); };
+$('wfTaskCancel').onclick   = () => { $('widgetFormTask').style.display  = 'none'; };
+$('wfEventCancel').onclick  = () => { $('widgetFormEvent').style.display = 'none'; };
+$('wfRecCancel').onclick    = () => { $('widgetFormRec').style.display   = 'none'; };
+
+$('wfTaskSave').onclick = () => {
+  const title = $('wfTaskTitle').value.trim();
+  if(!title){ showToast('Informe o título'); return; }
+  const date = $('widgetDate').value || iso(new Date());
+  state.specificDateTasks = state.specificDateTasks || [];
+  state.specificDateTasks.push({
+    id: uuid(),
+    title, date,
+    time: $('wfTaskTime').value,
+    endTime: $('wfTaskEndTime').value,
+    priority: $('wfTaskPriority').value,
+    createdAt: new Date().toISOString()
+  });
+  save();
+  $('wfTaskTitle').value = ''; $('wfTaskTime').value = ''; $('wfTaskEndTime').value = '';
+  $('widgetFormTask').style.display = 'none';
+  renderWidget(); renderToday(); showToast('✦ Atividade adicionada');
+};
+
+$('wfEventSave').onclick = () => {
+  const title = $('wfEventTitle').value.trim();
+  if(!title){ showToast('Informe o título'); return; }
+  const date = $('wfEventDate').value || $('widgetDate').value || iso(new Date());
+  state.events = state.events || [];
+  state.events.push({
+    id: uuid(),
+    title, date,
+    time: $('wfEventTime').value,
+    endTime: $('wfEventEndTime').value,
+    priority: $('wfEventPriority').value
+  });
+  save();
+  $('wfEventTitle').value = ''; $('wfEventDate').value = ''; $('wfEventTime').value = '';
+  $('wfEventEndTime').value = '';
+  $('widgetFormEvent').style.display = 'none';
+  renderWidget(); renderToday(); showToast('▶ Evento adicionado');
+};
+
+$('wfRecSave').onclick = () => {
+  const title = $('wfRecTitle').value.trim();
+  if(!title){ showToast('Informe o título'); return; }
+  const days = [...document.querySelectorAll('.wf-rec-day:checked')].map(c => parseInt(c.value));
+  if(!days.length){ showToast('Selecione pelo menos um dia'); return; }
+  state.recurring = state.recurring || [];
+  state.recurring.push({
+    id: uuid(), // Fix 11
+    title, priority: $('wfRecPriority').value,
+    increment: 1, goalId: '',
+    schedule: [{ days, start: $('wfRecStart').value, end: $('wfRecEnd').value }]
+  });
+  save(); $('wfRecTitle').value = ''; $('wfRecStart').value = ''; $('wfRecEnd').value = '';
+  $('widgetFormRec').style.display = 'none';
+  renderWidget(); renderToday(); showToast('↻ Rotina adicionada');
+};
+
+$('widgetAddToHome').onclick = async () => {
+  const baseUrl = location.origin + location.pathname.split('/').slice(0,-1).join('/');
+  const widgetUrl = baseUrl + '/#widget';
+  
+  // Tenta usar Web App Install Prompt (Android)
+  if(window.deferredPrompt) {
+    window.deferredPrompt.prompt();
+    const { outcome } = await window.deferredPrompt.userChoice;
+    if(outcome === 'accepted') {
+      showToast('✓ Widget adicionado à tela inicial');
+    }
+    window.deferredPrompt = null;
+    return;
+  }
+  
+  // Alternativa: criar um atalho manual ou abrir em nova aba
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;
+    z-index:9999;padding:20px;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background:white;border-radius:20px;padding:24px;max-width:400px;
+      color:#2c1810;box-shadow:0 8px 32px rgba(0,0,0,.2);
+    ">
+      <h3 style="margin:0 0 12px 0;font-size:1.1rem">📌 Adicionar Widget</h3>
+      <p style="color:#999;margin:0 0 16px 0;font-size:.9rem">
+        Escolha como adicionar o widget Minha Rotina à sua tela inicial:
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="window.open('${widgetUrl}');this.closest('div').parentElement.remove()" 
+          style="padding:12px;background:#d4a574;color:white;border:none;border-radius:12px;font-weight:500;cursor:pointer">
+          📱 Abrir Widget em Nova Aba
+        </button>
+        <button onclick="
+          const el=document.createElement('a');
+          el.href='${widgetUrl}';
+          el.textContent='Widget Rotina';
+          if(navigator.share){
+            navigator.share({title:'Widget Rotina',text:'Acesso rápido às atividades',url:'${widgetUrl}'})
+            .catch(e=>console.log('Share canceled'));
+          } else {
+            prompt('Copie este link para compartilhar:','${widgetUrl}');
+          }
+          this.closest('div').parentElement.remove();
+        " 
+          style="padding:12px;background:#f0f0f0;color:#2c1810;border:1px solid #ccc;border-radius:12px;font-weight:500;cursor:pointer">
+          🔗 Copiar Link do Widget
+        </button>
+        <button onclick="this.closest('div').parentElement.remove()" 
+          style="padding:12px;background:#f0f0f0;color:#2c1810;border:1px solid #ccc;border-radius:12px;cursor:pointer">
+          Cancelar
+        </button>
+      </div>
+      <p style="color:#999;margin:16px 0 0 0;font-size:.75rem">
+        <strong>Android:</strong> Use o navegador para abrir a aba, depois menu → "Instalar app"<br>
+        <strong>iOS:</strong> Abra em Safari, toque compartilhar → "Adicionar à tela inicial"
+      </p>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+};
+
+$('syncNowBtn').onclick = async () => {
+  if(!hasSupabase()){
+    showToast('Configure a sincronização primeiro (tela de login → ☁)');
+    return;
+  }
+  const u = currentUser();
+  if(!u) return;
+  setSyncStatus('syncing');
+  const updated = await syncFromCloud(u).catch(() => { setSyncStatus('error'); return false; });
+  if(updated){ renderAll(); showToast('☁ Dados atualizados da nuvem'); }
+  else { await syncToCloud().catch(() => setSyncStatus('error')); showToast('☁ Sincronizado'); }
+};
+
+/* Login */
+$('loginBtn').onclick  = login;
+$('loginUser').addEventListener('keydown', e => { if(e.key === 'Enter') $('loginPass').focus(); });
+$('loginPass').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+$('goSignup').onclick   = () => showLoginPanel('signup');
+$('goReset').onclick    = () => showLoginPanel('reset');
+
+/* Cadastro */
+$('signupBtn').onclick  = signup;
+$('signupUser').addEventListener('keydown', e => { if(e.key === 'Enter') $('signupEmail').focus(); });
+$('signupEmail').addEventListener('keydown', e => { if(e.key === 'Enter') $('signupPass').focus(); });
+$('signupPass').addEventListener('keydown', e => { if(e.key === 'Enter') $('signupPass2').focus(); });
+$('signupPass2').addEventListener('keydown', e => { if(e.key === 'Enter') signup(); });
+$('backToLogin').onclick = () => showLoginPanel('login');
+
+/* Recuperação de senha por email */
+$('resetBtn').onclick   = recoverPassword;
+$('resetNewPass2').addEventListener('keydown', e => { if(e.key === 'Enter') recoverPassword(); });
+$('backToLogin2').onclick = () => showLoginPanel('login');
+$('goDeleteAcc').onclick = () => showLoginPanel('delete');
+
+/* Apagar conta */
+$('delBtn').onclick = deleteAccountFromLogin;
+$('delConfirm').addEventListener('keydown', e => { if(e.key === 'Enter') deleteAccountFromLogin(); });
+$('backToLogin3').onclick = () => showLoginPanel('login');
+
+/* Supabase setup panel */
+$('goSupaSetup').onclick = () => {
+  const panel = $('supaSetupPanel');
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'block';
+  if(!visible) initSupaSetupPanel();
+};
+$('supaCloseBtn').onclick = () => { $('supaSetupPanel').style.display = 'none'; };
+$('supaDisableBtn').onclick = async () => {
+  const ok = await showConfirm('Desativar sincronização? Os dados locais permanecem, mas não serão mais enviados para a nuvem.', { label:'Desativar' });
+  if(!ok) return;
+  localStorage.removeItem(SUPA_CONFIG_KEY);
+  $('supaConnResult').innerHTML = '<div class="conn-ok">Sincronização desativada.</div>';
+  $('supaSaveBtn').disabled = true;
+  $('supaDisableBtn').style.display = 'none';
+  $('supaUrl').value = ''; $('supaKey').value = '';
+  setSyncStatus('none');
+};
+$('supaTestBtn').onclick = async () => {
+  const url = $('supaUrl').value.trim();
+  const key = $('supaKey').value.trim();
+  const res_el = $('supaConnResult');
+  res_el.innerHTML = '<span style="color:var(--muted)">Testando…</span>';
+  $('supaTestBtn').disabled = true;
+  const result = await testSupaConnection(url, key);
+  $('supaTestBtn').disabled = false;
+  if(result.ok){
+    res_el.innerHTML = '<div class="conn-ok">✓ Conexão OK! Clique em "Salvar e ativar".</div>';
+    $('supaSaveBtn').disabled = false;
+  } else if(result.needsSQL){
+    res_el.innerHTML = `<div class="conn-err">⚠ Tabelas não encontradas. Execute o SQL acima no Editor SQL do Supabase, depois teste novamente.</div>`;
+    $('supaSaveBtn').disabled = true;
+  } else {
+    res_el.innerHTML = `<div class="conn-err">✗ ${result.error || 'Falha na conexão'}</div>`;
+    $('supaSaveBtn').disabled = true;
+  }
+};
+$('supaSaveBtn').onclick = () => {
+  const url = $('supaUrl').value.trim();
+  const key = $('supaKey').value.trim();
+  setSupaConfig(url, key);
+  $('supaConnResult').innerHTML = '<div class="conn-ok">✓ Configuração salva. Faça login para sincronizar.</div>';
+  $('supaDisableBtn').style.display = 'inline-flex';
+  showToast('☁ Supabase configurado! Faça login para sincronizar.');
+};
+
+/* ============================================================
+   Boot
+   ============================================================ */
+// Zeragem do banco: limpa dados locais na primeira abertura da v6.
+migrateToV6();
+
+
+$('todayDate').value = iso(today);
+$('todayDate').onchange = renderToday;
+$('todayPrev').onclick = () => {
+  const d = new Date($('todayDate').value + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  $('todayDate').value = iso(d);
+  weekRef = d; // Fix 2 — sincroniza semana
+  renderToday();
+};
+$('todayNext').onclick = () => {
+  const d = new Date($('todayDate').value + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  $('todayDate').value = iso(d);
+  weekRef = d; // Fix 2 — sincroniza semana
+  renderToday();
+};
+$('todayNow').onclick = () => {
+  $('todayDate').value = iso(new Date());
+  weekRef = new Date(); // Fix 2 — reseta semana para hoje
+  renderToday();
+};
+const cur = currentUser();
+const userExists = cur && findUser(cur);
+if(cur && userExists){
+  loadStateForCurrent();
+  showApp();
+  // Sync automático na abertura (sem bloquear a UI)
+  if(hasSupabase()){
+    setSyncStatus('syncing');
+    syncFromCloud(cur).then(updated => {
+      setSyncStatus('ok');
+      if(updated) renderAll();
+    }).catch(() => setSyncStatus('error'));
+  } else {
+    setSyncStatus('none');
+  }
+} else {
+  if(cur && !userExists){
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(CURRENT_KEY);
+  }
+  showLogin();
+}
+
+// ── Atalho por hash: abre direto numa aba (ex.: #widget) ──
+try{
+  const _h = (location.hash || '').replace('#','');
+  const _app = document.getElementById('appScreen');
+  if(_app && _app.style.display !== 'none' &&
+     ['plan','today','week','month','report','widget'].includes(_h)){
+    show(_h);
+  }
+}catch(e){}
+
+// Detecta quando o app volta para o foco (mudança de aba/app) e sincroniza
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && hasSupabase()){
+    const u = currentUser();
+    if(!u) return;
+    syncFromCloud(u).then(updated => {
+      if(updated){ renderAll(); showToast('☁ Dados atualizados'); }
+    }).catch(() => {});
+  }
+});
+
+// Detecta volta de offline
+window.addEventListener('online', () => {
+  if(hasSupabase()) syncToCloud().catch(() => {});
+});
+window.addEventListener('offline', () => setSyncStatus('offline'));
+
+/* ============================================================
+   PWA — Service Worker + Install Prompt
+   ============================================================ */
+let deferredInstallPrompt = null;
+
+// ── Registro do Service Worker com detecção de atualização ──────────────
+// Quando uma nova versão do app é publicada (GitHub Pages), o SW detecta
+// automaticamente e exibe um banner "Atualizar" — sem pedir para o usuário
+// limpar o cache e SEM apagar nenhum dado do localStorage.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        console.log('SW registrado:', reg.scope);
+
+        // Detecta quando um novo SW terminou de instalar
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if(!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            // Novo SW está pronto e esperando — mostra o banner de atualização
+            if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+              showUpdateBanner();
+            }
+          });
+        });
+      })
+      .catch(err => console.log('SW não disponível (modo local):', err.message));
+
+    // Recebe a mensagem postada pelo SW quando ele ativa
+    navigator.serviceWorker.addEventListener('message', e => {
+      if(e.data && e.data.type === 'SW_UPDATED'){
+        showUpdateBanner();
+      }
+    });
+
+    // Se o controller mudar (novo SW assumiu controle), recarrega silenciosamente
+    // apenas se o banner NÃO estiver visível (tab que estava em background)
+    let reloadPending = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(reloadPending) return;
+      const banner = document.getElementById('updateBanner');
+      if(!banner || banner.style.display === 'none'){
+        // Recarrega a aba que estava em background sem interromper o usuário ativo
+        reloadPending = true;
+        window.location.reload();
+      }
+    });
+  });
+}
+
+function showUpdateBanner(){
+  const banner = document.getElementById('updateBanner');
+  if(banner) banner.style.display = 'block';
+}
+
+function applyUpdate(){
+  document.getElementById('updateBanner').style.display = 'none';
+  // Um simples reload é suficiente: o localStorage é preservado,
+  // apenas o HTML/JS em cache é trocado pela nova versão.
+  window.location.reload();
+}
+
+// Captura o evento de instalação antes de ele ser descartado pelo browser
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if(btn){ btn.style.display = 'flex'; }
+  const banner = document.getElementById('installBanner');
+  if(banner){ banner.style.display = 'block'; }
+});
+
+// Após instalar, esconde o botão
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  const btn = document.getElementById('installBtn');
+  if(btn){ btn.style.display = 'none'; }
+  showToast('✓ App instalado na tela inicial!');
+});
+
+function triggerInstall(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(choice => {
+      if(choice.outcome === 'accepted') showToast('App instalado!');
+      deferredInstallPrompt = null;
+    });
+  } else {
+    // Fallback: instrução manual
+    showInstallInstructions();
+  }
+}
+
+function showInstallInstructions(){
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  let msg;
+  if(isIOS){
+    msg = 'No Safari: toque em ↑ Compartilhar → "Adicionar à Tela de Início"';
+  } else if(isAndroid){
+    msg = 'No Chrome: toque em ⋮ (menu) → "Adicionar à tela inicial"';
+  } else {
+    msg = 'No Chrome/Edge: clique em ⋮ → "Instalar Minha Rotina"';
+  }
+  showToast(msg, 4000);
+}
+
+</script>
+
+<!-- Banner de atualização (aparece quando uma nova versão está disponível) -->
+<div id="updateBanner" style="
+  display:none;position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));
+  left:50%;transform:translateX(-50%);width:min(380px,calc(100% - 32px));
+  background:rgba(60,90,70,.97);border:1px solid rgba(159,212,168,.35);
+  border-radius:20px;padding:14px 16px;z-index:21;
+  box-shadow:0 8px 32px rgba(0,0,0,.32);backdrop-filter:blur(12px);
+  animation:slideUp .3s ease;">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:2rem;line-height:1">🔄</div>
+    <div style="flex:1">
+      <div style="font-weight:700;color:#fff7f4;font-size:.95rem">Nova versão disponível</div>
+      <div style="font-size:.78rem;color:rgba(255,247,244,.7);margin-top:2px">Seus dados estão seguros — só o app será recarregado</div>
+    </div>
+    <button onclick="document.getElementById('updateBanner').style.display='none'"
+      style="background:transparent;color:rgba(255,247,244,.5);font-size:1.2rem;padding:4px 8px;min-height:auto">✕</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button onclick="document.getElementById('updateBanner').style.display='none'"
+      style="flex:1;background:rgba(255,255,255,.12);color:#fff7f4;border-radius:10px;padding:8px;min-height:auto;font-size:.85rem">Depois</button>
+    <button onclick="applyUpdate()" class="primary"
+      style="flex:2;border-radius:10px;padding:8px;min-height:auto;font-size:.85rem;background:rgba(159,212,168,.85);color:#1a3a22">✓ Atualizar agora</button>
+  </div>
+</div>
+
+<!-- Banner de instalação (aparece quando PWA detecta que pode instalar) -->
+<div id="installBanner" style="
+  display:none;position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));
+  left:50%;transform:translateX(-50%);width:min(380px,calc(100% - 32px));
+  background:rgba(113,77,72,.97);border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;padding:14px 16px;z-index:20;
+  box-shadow:0 8px 32px rgba(0,0,0,.28);backdrop-filter:blur(12px);
+  animation:slideUp .3s ease;">
+  <style>@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}</style>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:2rem;line-height:1">📲</div>
+    <div style="flex:1">
+      <div style="font-weight:700;color:#fff7f4;font-size:.95rem">Instalar Minha Rotina</div>
+      <div style="font-size:.78rem;color:rgba(255,247,244,.7);margin-top:2px">Adicione à tela inicial para acesso rápido</div>
+    </div>
+    <button onclick="document.getElementById('installBanner').style.display='none'" style="background:transparent;color:rgba(255,247,244,.5);font-size:1.2rem;padding:4px 8px;min-height:auto">✕</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button onclick="document.getElementById('installBanner').style.display='none'" style="flex:1;background:rgba(255,255,255,.12);color:#fff7f4;border-radius:10px;padding:8px;min-height:auto;font-size:.85rem">Agora não</button>
+    <button onclick="triggerInstall();document.getElementById('installBanner').style.display='none'" class="primary" style="flex:2;border-radius:10px;padding:8px;min-height:auto;font-size:.85rem">Instalar</button>
+  </div>
+</div>
+</body>
+</html>
