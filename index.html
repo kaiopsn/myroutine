@@ -128,7 +128,8 @@
   .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
   .top-actions button{padding:9px 13px;min-height:40px;font-size:.85rem}
 
-  .layout{display:grid;grid-template-columns:1fr;gap:14px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+  .layout > main, .layout > aside{min-width:0}
   aside{order:-1}
   .card{
     background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);
@@ -146,7 +147,7 @@
     position:fixed;left:50%;transform:translateX(-50%);
     bottom:max(10px,env(safe-area-inset-bottom,10px));
     width:min(560px,calc(100% - 20px));
-    display:grid;grid-template-columns:repeat(6,1fr);gap:2px;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:2px;
     background:rgba(50,31,28,.82);border:1px solid var(--line);
     border-radius:22px;padding:6px;z-index:30;box-shadow:var(--shadow-lg);
     backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
@@ -240,9 +241,11 @@
   .week-col>div{padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.1);font-size:.82rem;line-height:1.5}
 
   /* ---- Relatório ---- */
-  .status-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;padding:10px;border-radius:14px;background:var(--surface-2)}
-  .status-row label{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:var(--r-pill);background:var(--surface);font-size:.85rem;cursor:pointer}
-  .status-row label:has(input:checked){background:rgba(255,255,255,.24);font-weight:700}
+  /* Estados da meta: grade 2x2 no mobile (todos os 4 sempre visíveis) */
+  .status-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;padding:10px;border-radius:14px;background:var(--surface-2)}
+  .item .status-row label{display:flex;gap:8px;align-items:center;justify-content:flex-start;min-width:0;padding:11px 12px;border-radius:12px;background:var(--surface);border:1px solid transparent;font-size:.84rem;font-weight:600;cursor:pointer;min-height:46px}
+  .item .status-row label:has(input:checked){background:rgba(255,255,255,.24);font-weight:700;border-color:var(--line-strong)}
+  @media(min-width:620px){ .status-row{grid-template-columns:repeat(4,minmax(0,1fr))} }
   .item.outcome-done{box-shadow:inset 4px 0 0 var(--ok);opacity:.75;background:rgba(0,0,0,.1)}
   .item.outcome-done strong{text-decoration:line-through;color:rgba(255,247,244,.65)}
   .item.outcome-failed{box-shadow:inset 4px 0 0 var(--high);opacity:.62;background:rgba(0,0,0,.16);filter:grayscale(.25)}
@@ -287,11 +290,6 @@
   .snapshot-current .val{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums}
   .snapshot-current .delta{font-size:.85rem;color:var(--muted)}
 
-  /* ---- Chips do Widget (resumo do dia) ---- */
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-pill);font-size:.85rem;font-weight:700;font-variant-numeric:tabular-nums}
-  .c-done{background:rgba(159,212,168,.28);color:#d6f2db}
-  .c-missed{background:rgba(231,154,154,.26);color:#ffdada}
-  .c-pending{background:rgba(244,213,159,.24);color:#f7e6c4}
 
   /* ---- Login ---- */
   .login-wrap{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px max(18px,env(safe-area-inset-left,0px)) 24px max(18px,env(safe-area-inset-right,0px))}
@@ -343,7 +341,7 @@
   @media(min-width:760px){
     .app{padding-top:calc(env(safe-area-inset-top,0px) + 20px)}
     .title{font-size:1.8rem}
-    body.tab-plan .layout{grid-template-columns:340px 1fr}
+    body.tab-plan .layout{grid-template-columns:340px minmax(0,1fr)}
     body.tab-plan aside{order:0}
     .tabs{width:min(680px,calc(100% - 24px))}
     .section{padding:22px}
@@ -359,13 +357,6 @@
     .title{font-size:1.35rem}
   }
   @media(max-width:640px){ #seed{display:none} }
-
-  /* Status row com scroll horizontal no celular */
-  @media(max-width:600px){
-    .status-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-    .status-row::-webkit-scrollbar{display:none}
-    .status-row label{flex-shrink:0;white-space:nowrap}
-  }
 
   /* Respeita quem prefere menos movimento */
   @media(prefers-reduced-motion:reduce){
@@ -754,102 +745,6 @@ create policy "allow_all" on rt_states
         </div>
       </section>
 
-      <section class="card section view" id="view-widget">
-        <h2>📱 Widget Hoje</h2>
-        <p class="muted">Visualização rápida das atividades do dia.</p>
-        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-            <div>
-              <div class="small">Data</div>
-              <input id="widgetDate" type="date" style="max-width:200px">
-            </div>
-            <button id="widgetAddToHome" class="primary" style="padding:8px 12px;font-size:.8rem;white-space:nowrap">📌 Atalho</button>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-            <div style="display:flex;gap:6px">
-              <button id="widgetPrev" class="ghost" style="padding:8px 12px;font-size:.8rem">◀</button>
-              <button id="widgetToday" class="ghost" style="padding:8px 12px;font-size:.8rem">Hoje</button>
-              <button id="widgetNext" class="ghost" style="padding:8px 12px;font-size:.8rem">▶</button>
-            </div>
-          </div>
-          <div id="widgetSummary" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:rgba(255,255,255,.05);border-radius:14px">
-            <button id="widgetAddTask" class="ghost" style="flex:1;font-size:.82rem">✦ Atividade</button>
-            <button id="widgetAddEvent" class="ghost" style="flex:1;font-size:.82rem">▶ Evento</button>
-            <button id="widgetAddRec" class="ghost" style="flex:1;font-size:.82rem">↻ Rotina</button>
-          </div>
-
-          <!-- Formulário inline: Atividade -->
-          <div id="widgetFormTask" style="display:none;flex-direction:column;gap:8px;padding:14px;background:rgba(255,255,255,.06);border-radius:14px;border:1px solid var(--line)">
-            <strong class="small">✦ Nova atividade única</strong>
-            <input id="wfTaskTitle" placeholder="Título da atividade">
-            <div class="row" style="gap:8px">
-              <input id="wfTaskTime" type="time" style="flex:1" title="Início">
-              <input id="wfTaskEndTime" type="time" style="flex:1" title="Término">
-              <select id="wfTaskPriority" style="flex:1">
-                <option value="low">Baixa</option>
-                <option value="medium" selected>Média</option>
-                <option value="high">Alta</option>
-              </select>
-            </div>
-            <div class="row" style="gap:8px">
-              <button id="wfTaskSave" class="primary" style="flex:1">Adicionar</button>
-              <button id="wfTaskCancel" class="ghost" style="flex:1">Cancelar</button>
-            </div>
-          </div>
-
-          <!-- Formulário inline: Evento -->
-          <div id="widgetFormEvent" style="display:none;flex-direction:column;gap:8px;padding:14px;background:rgba(255,255,255,.06);border-radius:14px;border:1px solid var(--line)">
-            <strong class="small">▶ Novo evento</strong>
-            <input id="wfEventTitle" placeholder="Título do evento">
-            <div class="row" style="gap:8px">
-              <input id="wfEventDate" type="date" style="flex:1">
-              <input id="wfEventTime" type="time" style="flex:1" title="Início">
-              <input id="wfEventEndTime" type="time" style="flex:1" title="Término">
-            </div>
-            <select id="wfEventPriority">
-              <option value="low">Prioridade baixa</option>
-              <option value="medium" selected>Prioridade média</option>
-              <option value="high">Prioridade alta</option>
-            </select>
-            <div class="row" style="gap:8px">
-              <button id="wfEventSave" class="primary" style="flex:1">Adicionar</button>
-              <button id="wfEventCancel" class="ghost" style="flex:1">Cancelar</button>
-            </div>
-          </div>
-
-          <!-- Formulário inline: Rotina -->
-          <div id="widgetFormRec" style="display:none;flex-direction:column;gap:8px;padding:14px;background:rgba(255,255,255,.06);border-radius:14px;border:1px solid var(--line)">
-            <strong class="small">↻ Nova rotina recorrente</strong>
-            <input id="wfRecTitle" placeholder="Título da rotina">
-            <div class="row" style="gap:8px">
-              <input id="wfRecStart" type="time" style="flex:1" placeholder="Início">
-              <input id="wfRecEnd" type="time" style="flex:1" placeholder="Fim">
-            </div>
-            <div class="row" style="gap:6px;flex-wrap:wrap">
-              <span class="small" style="width:100%">Dias da semana:</span>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="1" checked> Seg</label>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="2" checked> Ter</label>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="3" checked> Qua</label>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="4" checked> Qui</label>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="5" checked> Sex</label>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="6"> Sáb</label>
-              <label class="small"><input type="checkbox" class="wf-rec-day" value="0"> Dom</label>
-            </div>
-            <select id="wfRecPriority">
-              <option value="low">Prioridade baixa</option>
-              <option value="medium" selected>Prioridade média</option>
-              <option value="high">Prioridade alta</option>
-            </select>
-            <div class="row" style="gap:8px">
-              <button id="wfRecSave" class="primary" style="flex:1">Adicionar</button>
-              <button id="wfRecCancel" class="ghost" style="flex:1">Cancelar</button>
-            </div>
-          </div>
-          <div id="widgetList" class="list"></div>
-        </div>
-      </section>
-
     </main>
   </div>
 
@@ -859,7 +754,6 @@ create policy "allow_all" on rt_states
     <button class="tab" data-tab="week"><span class="tab-ico">🗓️</span><span class="tab-lbl">Semana</span></button>
     <button class="tab" data-tab="month"><span class="tab-ico">📅</span><span class="tab-lbl">Mês</span></button>
     <button class="tab" data-tab="report"><span class="tab-ico">📊</span><span class="tab-lbl">Metas</span></button>
-    <button class="tab" data-tab="widget"><span class="tab-ico">⚡</span><span class="tab-lbl">Widget</span></button>
   </nav>
 </div>
 
@@ -1958,8 +1852,6 @@ function setEntry(date, k, v){
 }
 function status(date, id){ return entry(date, 's-' + id) || 'pending'; }
 function setStatus(date, id, v){ setEntry(date, 's-' + id, v); }
-/* Alias usado pela aba Widget — mesma leitura de status. */
-function getStatus(date, id){ return status(date, id); }
 
 function addGoal(){
   const name = $('goalName').value.trim();
@@ -2998,19 +2890,21 @@ function renderGoalCard(g, opts){
   `;
 
   d.innerHTML = `
-    <div class="between">
+    <div class="between goal-head">
       <div style="flex:1;min-width:0">
-        <strong>${escapeHtml(g.name)}</strong>
+        <div class="between" style="gap:8px">
+          <span class="${badgeCls}">${badgeText}</span>
+          <span class="row" style="flex-shrink:0;gap:6px">
+            <button class="iconbtn" data-edit-goal="${g.id}" title="editar">✎</button>
+            <button class="iconbtn" data-del-goal="${g.id}" title="apagar">×</button>
+          </span>
+        </div>
+        <strong style="display:block;margin-top:8px">${escapeHtml(g.name)}</strong>
         <div class="small">
           ${isSnapshot ? '' : (p.done + ' de ' + p.target + ' ' + escapeHtml(g.unit || '') + ' · ' + p.percent + '%')}
           ${isSnapshot ? p.percent + '% do caminho' : ''}
           ${sub.length ? ' · ' + sub.join(' · ') : ''}
         </div>
-      </div>
-      <div class="row">
-        <span class="${badgeCls}">${badgeText}</span>
-        <button class="iconbtn" data-edit-goal="${g.id}" title="editar">✎</button>
-        <button class="iconbtn" data-del-goal="${g.id}" title="apagar">×</button>
       </div>
     </div>
 
@@ -3400,7 +3294,7 @@ function renderWeek(){
     card.innerHTML = `
       <div class="between">
         <strong>${WD[d.getDay()]} ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</strong>
-        <span class="small">${items.length} itens</span>
+        <span class="small">${items.length} ${items.length === 1 ? 'item' : 'itens'}</span>
       </div>
       <div class="week-col small" style="margin-top:10px">
         <div><strong>Manhã</strong><br>${m.join('<br>') || '—'}</div>
@@ -3551,123 +3445,6 @@ function renderReport(){
   wireGoalCardEvents(box);
 }
 
-function renderWidget(){
-  let widgetDate = $('widgetDate').value;
-  if(!widgetDate) widgetDate = iso(new Date());
-  $('widgetDate').value = widgetDate;
-
-  const dateObj = new Date(widgetDate + 'T00:00:00');
-  const recs = recurringFor(widgetDate);
-  const events = eventsFor(widgetDate);
-  const tasks = tasksFor(widgetDate);
-
-  const items = [
-    ...recs.map(o => ({kind:'rec', time:o.slot.start||'99:99', data:o})),
-    ...events.map(e => ({kind:'ev', time:e.time||'99:99', data:e})),
-    ...tasks.map(t => ({kind:'task', time:t.time||'99:99', data:t}))
-  ].sort((a,b) => a.time.localeCompare(b.time));
-
-  let nDone=0, nMissed=0, nPending=0;
-  items.forEach(it => {
-    let sid;
-    if(it.kind==='rec') sid = it.data.routine.id;
-    else if(it.kind==='task') sid = 'task:' + it.data.data?.id;
-    else sid = null;
-    if(!sid) return;
-    const s = getStatus(widgetDate, sid);
-    if(s==='done') nDone++;
-    else if(s==='missed'||s==='canceled') nMissed++;
-    else nPending++;
-  });
-
-  const sumDiv = $('widgetSummary');
-  sumDiv.innerHTML = '';
-  if(items.length){
-    if(nDone) sumDiv.innerHTML += `<span class="chip c-done">✓ ${nDone}</span>`;
-    if(nMissed) sumDiv.innerHTML += `<span class="chip c-missed">✗ ${nMissed}</span>`;
-    if(nPending) sumDiv.innerHTML += `<span class="chip c-pending">● ${nPending}</span>`;
-  }
-
-  const list = $('widgetList');
-  if(!items.length){
-    list.innerHTML = `<div class="item muted" style="text-align:center;padding:40px 20px">🌿<br>Nenhuma atividade para ${fmtDate(widgetDate)}.</div>`;
-    return;
-  }
-
-  list.innerHTML = '';
-  items.forEach(it => {
-    const el = document.createElement('div');
-    if(it.kind==='ev'){
-      const e = it.data;
-      el.className = 'item prio-' + (e.priority||'medium');
-      const timeStr = fmtTimeRange(e.time, e.endTime);
-      el.innerHTML = `
-        <div class="between">
-          <div style="flex:1">
-            <strong>${escapeHtml(e.title)}</strong>
-            <div class="small">${timeStr || ''}</div>
-          </div>
-          <span class="label">📅</span>
-        </div>`;
-    } else if(it.kind==='task'){
-      const t = it.data;
-      const s = getStatus(widgetDate, 'task:' + t.id);
-      const c = s==='done'?'done':s==='missed'?'missed':s==='canceled'?'canceled':'';
-      el.className = 'item task prio-' + (t.priority||'medium') + ' ' + c;
-      const timeStr = fmtTimeRange(t.time, t.endTime);
-      el.innerHTML = `
-        <div class="between">
-          <div style="flex:1">
-            <strong>✦ ${escapeHtml(t.title)}</strong>
-            <div class="small">${timeStr || '—'}</div>
-          </div>
-          <span class="pbad p-${t.priority||'medium'}">${prioPt(t.priority||'medium')}</span>
-          <label><input type="radio" name="wt-${t.id}" value="missed" ${s==='missed'?'checked':''} data-widget-task="${t.id}" data-widget-date="${widgetDate}"> Não fiz</label>
-          <label><input type="radio" name="wt-${t.id}" value="canceled" ${s==='canceled'?'checked':''} data-widget-task="${t.id}" data-widget-date="${widgetDate}"> Cancelada</label>
-          <label><input type="radio" name="wt-${t.id}" value="pending" ${s==='pending'?'checked':''} data-widget-task="${t.id}" data-widget-date="${widgetDate}"> Pendente</label>
-        </div>`;
-    } else {
-      const o = it.data;
-      const r = o.routine;
-      const s = getStatus(widgetDate, r.id);
-      const c = s==='done'?'done':s==='missed'?'missed':s==='canceled'?'canceled':'';
-      el.className = 'item task prio-' + (r.priority||'medium') + ' ' + c;
-      el.innerHTML = `
-        <div class="between">
-          <div style="flex:1;min-width:0">
-            <strong>${escapeHtml(r.title)}</strong>
-            <div class="small">${o.slot.start||''}${o.slot.end?' - '+o.slot.end:''}</div>
-          </div>
-          <span class="pbad p-${r.priority||'medium'}">${prioPt(r.priority||'medium')}</span>
-          <label><input type="radio" name="wr-${r.id}" value="missed" ${s==='missed'?'checked':''} data-widget-routine="${r.id}" data-widget-date="${widgetDate}"> Não fiz</label>
-          <label><input type="radio" name="wr-${r.id}" value="canceled" ${s==='canceled'?'checked':''} data-widget-routine="${r.id}" data-widget-date="${widgetDate}"> Cancelada</label>
-          <label><input type="radio" name="wr-${r.id}" value="pending" ${s==='pending'?'checked':''} data-widget-routine="${r.id}" data-widget-date="${widgetDate}"> Pendente</label>
-        </div>`;
-    }
-    list.appendChild(el);
-  });
-
-  // Wire radios
-  list.querySelectorAll('input[type=radio][data-widget-routine]').forEach(radio => {
-    radio.onchange = () => {
-      setStatus(radio.dataset.widgetDate, radio.dataset.widgetRoutine, radio.value);
-      save();
-      renderWidget();
-      renderToday();
-      renderReport();
-    };
-  });
-  list.querySelectorAll('input[type=radio][data-widget-task]').forEach(radio => {
-    radio.onchange = () => {
-      setStatus(radio.dataset.widgetDate, 'task:' + radio.dataset.widgetTask, radio.value);
-      save();
-      renderWidget();
-      renderToday();
-      renderReport();
-    };
-  });
-}
-
 function stats(){
   const active = state.goals.filter(g => g.status !== 'archived');
   $('mGoals').textContent = active.length;
@@ -3701,10 +3478,9 @@ function show(name){
   const target = $('view-' + name);
   if(target) target.classList.add('active');
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  document.body.classList.remove('tab-plan','tab-today','tab-week','tab-month','tab-report','tab-settings','tab-widget');
+  document.body.classList.remove('tab-plan','tab-today','tab-week','tab-month','tab-report','tab-settings');
   document.body.classList.add('tab-' + name);
   if(name === 'settings') refreshSettings();
-  if(name === 'widget') renderWidget();
 }
 
 /* ============================================================
@@ -3736,7 +3512,16 @@ document.querySelectorAll('#reportFilters .filter-chip').forEach(chip => {
   };
 });
 
-$('seed').onclick = () => {
+$('seed').onclick = async () => {
+  const hasData = (state.goals && state.goals.length) || (state.events && state.events.length)
+    || (state.recurring && state.recurring.length) || (state.specificDateTasks && state.specificDateTasks.length);
+  if(hasData){
+    const ok = await showConfirm(
+      'Carregar os dados de demonstração vai <strong>substituir tudo</strong> que você já cadastrou nesta conta. Continuar?',
+      { label: 'Carregar demo', danger: true }
+    );
+    if(!ok) return;
+  }
   const now = new Date().toISOString();
   state.goals = [
     { id: uuid(), name:'Ler 400 páginas', type:'pages', target:400, unit:'páginas',
@@ -3858,161 +3643,6 @@ $('setImportFile').onchange = (e) => {
   setTimeout(refreshSettings, 500);
 };
 $('setDeleteAccBtn').onclick = deleteCurrentAccount;
-
-/* Widget Hoje */
-$('widgetPrev').onclick = () => {
-  const d = new Date($('widgetDate').value + 'T00:00:00');
-  d.setDate(d.getDate() - 1);
-  $('widgetDate').value = iso(d);
-  renderWidget();
-};
-$('widgetNext').onclick = () => {
-  const d = new Date($('widgetDate').value + 'T00:00:00');
-  d.setDate(d.getDate() + 1);
-  $('widgetDate').value = iso(d);
-  renderWidget();
-};
-$('widgetToday').onclick = () => {
-  $('widgetDate').value = iso(new Date());
-  renderWidget();
-};
-$('widgetDate').onchange = renderWidget;
-
-/* ── Widget Quick Add — formulários inline ── */
-function wfToggle(formId){
-  ['widgetFormTask','widgetFormEvent','widgetFormRec'].forEach(id => {
-    const el = $(id);
-    el.style.display = (id === formId && el.style.display !== 'flex') ? 'flex' : 'none';
-  });
-}
-$('widgetAddTask').onclick  = () => { wfToggle('widgetFormTask');  $('wfTaskTitle').focus(); };
-$('widgetAddEvent').onclick = () => { wfToggle('widgetFormEvent'); $('wfEventTitle').focus(); };
-$('widgetAddRec').onclick   = () => { wfToggle('widgetFormRec');   $('wfRecTitle').focus(); };
-$('wfTaskCancel').onclick   = () => { $('widgetFormTask').style.display  = 'none'; };
-$('wfEventCancel').onclick  = () => { $('widgetFormEvent').style.display = 'none'; };
-$('wfRecCancel').onclick    = () => { $('widgetFormRec').style.display   = 'none'; };
-
-$('wfTaskSave').onclick = () => {
-  const title = $('wfTaskTitle').value.trim();
-  if(!title){ showToast('Informe o título'); return; }
-  const date = $('widgetDate').value || iso(new Date());
-  state.specificDateTasks = state.specificDateTasks || [];
-  state.specificDateTasks.push({
-    id: uuid(),
-    title, date,
-    time: $('wfTaskTime').value,
-    endTime: $('wfTaskEndTime').value,
-    priority: $('wfTaskPriority').value,
-    createdAt: new Date().toISOString()
-  });
-  save();
-  $('wfTaskTitle').value = ''; $('wfTaskTime').value = ''; $('wfTaskEndTime').value = '';
-  $('widgetFormTask').style.display = 'none';
-  renderWidget(); renderToday(); showToast('✦ Atividade adicionada');
-};
-
-$('wfEventSave').onclick = () => {
-  const title = $('wfEventTitle').value.trim();
-  if(!title){ showToast('Informe o título'); return; }
-  const date = $('wfEventDate').value || $('widgetDate').value || iso(new Date());
-  state.events = state.events || [];
-  state.events.push({
-    id: uuid(),
-    title, date,
-    time: $('wfEventTime').value,
-    endTime: $('wfEventEndTime').value,
-    priority: $('wfEventPriority').value
-  });
-  save();
-  $('wfEventTitle').value = ''; $('wfEventDate').value = ''; $('wfEventTime').value = '';
-  $('wfEventEndTime').value = '';
-  $('widgetFormEvent').style.display = 'none';
-  renderWidget(); renderToday(); showToast('▶ Evento adicionado');
-};
-
-$('wfRecSave').onclick = () => {
-  const title = $('wfRecTitle').value.trim();
-  if(!title){ showToast('Informe o título'); return; }
-  const days = [...document.querySelectorAll('.wf-rec-day:checked')].map(c => parseInt(c.value));
-  if(!days.length){ showToast('Selecione pelo menos um dia'); return; }
-  state.recurring = state.recurring || [];
-  state.recurring.push({
-    id: uuid(), // Fix 11
-    title, priority: $('wfRecPriority').value,
-    increment: 1, goalId: '',
-    schedule: [{ days, start: $('wfRecStart').value, end: $('wfRecEnd').value }]
-  });
-  save(); $('wfRecTitle').value = ''; $('wfRecStart').value = ''; $('wfRecEnd').value = '';
-  $('widgetFormRec').style.display = 'none';
-  renderWidget(); renderToday(); showToast('↻ Rotina adicionada');
-};
-
-$('widgetAddToHome').onclick = async () => {
-  const baseUrl = location.origin + location.pathname.split('/').slice(0,-1).join('/');
-  const widgetUrl = baseUrl + '/#widget';
-  
-  // Tenta usar Web App Install Prompt (Android)
-  if(window.deferredPrompt) {
-    window.deferredPrompt.prompt();
-    const { outcome } = await window.deferredPrompt.userChoice;
-    if(outcome === 'accepted') {
-      showToast('✓ Widget adicionado à tela inicial');
-    }
-    window.deferredPrompt = null;
-    return;
-  }
-  
-  // Alternativa: criar um atalho manual ou abrir em nova aba
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;
-    z-index:9999;padding:20px;
-  `;
-  
-  modal.innerHTML = `
-    <div style="
-      background:white;border-radius:20px;padding:24px;max-width:400px;
-      color:#2c1810;box-shadow:0 8px 32px rgba(0,0,0,.2);
-    ">
-      <h3 style="margin:0 0 12px 0;font-size:1.1rem">📌 Adicionar Widget</h3>
-      <p style="color:#999;margin:0 0 16px 0;font-size:.9rem">
-        Escolha como adicionar o widget Minha Rotina à sua tela inicial:
-      </p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button onclick="window.open('${widgetUrl}');this.closest('div').parentElement.remove()" 
-          style="padding:12px;background:#d4a574;color:white;border:none;border-radius:12px;font-weight:500;cursor:pointer">
-          📱 Abrir Widget em Nova Aba
-        </button>
-        <button onclick="
-          const el=document.createElement('a');
-          el.href='${widgetUrl}';
-          el.textContent='Widget Rotina';
-          if(navigator.share){
-            navigator.share({title:'Widget Rotina',text:'Acesso rápido às atividades',url:'${widgetUrl}'})
-            .catch(e=>console.log('Share canceled'));
-          } else {
-            prompt('Copie este link para compartilhar:','${widgetUrl}');
-          }
-          this.closest('div').parentElement.remove();
-        " 
-          style="padding:12px;background:#f0f0f0;color:#2c1810;border:1px solid #ccc;border-radius:12px;font-weight:500;cursor:pointer">
-          🔗 Copiar Link do Widget
-        </button>
-        <button onclick="this.closest('div').parentElement.remove()" 
-          style="padding:12px;background:#f0f0f0;color:#2c1810;border:1px solid #ccc;border-radius:12px;cursor:pointer">
-          Cancelar
-        </button>
-      </div>
-      <p style="color:#999;margin:16px 0 0 0;font-size:.75rem">
-        <strong>Android:</strong> Use o navegador para abrir a aba, depois menu → "Instalar app"<br>
-        <strong>iOS:</strong> Abra em Safari, toque compartilhar → "Adicionar à tela inicial"
-      </p>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-};
 
 $('syncNowBtn').onclick = async () => {
   if(!hasSupabase()){
@@ -4150,12 +3780,12 @@ if(cur && userExists){
   showLogin();
 }
 
-// ── Atalho por hash: abre direto numa aba (ex.: #widget) ──
+// ── Atalho por hash: abre direto numa aba (ex.: #today) ──
 try{
   const _h = (location.hash || '').replace('#','');
   const _app = document.getElementById('appScreen');
   if(_app && _app.style.display !== 'none' &&
-     ['plan','today','week','month','report','widget'].includes(_h)){
+     ['plan','today','week','month','report'].includes(_h)){
     show(_h);
   }
 }catch(e){}
