@@ -370,6 +370,53 @@
     .title{font-size:1.35rem}
   }
 
+  /* ---- Resumo do dia + sequência (Hoje) ---- */
+  .day-summary{padding:14px;border-radius:var(--r-lg);background:var(--surface-2);border:1px solid var(--line)}
+  .streak-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r-pill);background:rgba(244,213,159,.22);color:#f7e6c4;font-size:.78rem;font-weight:700;white-space:nowrap}
+
+  /* ---- Botão flutuante de adição rápida (Hoje) ---- */
+  .fab{
+    position:fixed;right:max(16px,env(safe-area-inset-right,16px));
+    bottom:calc(var(--nav-h) + 30px + env(safe-area-inset-bottom,0px));
+    width:58px;height:58px;border-radius:var(--r-pill);padding:0;
+    background:var(--primary);color:var(--primary-ink);
+    font-size:1.8rem;font-weight:700;line-height:1;
+    box-shadow:var(--shadow-lg);z-index:25;
+    display:none;align-items:center;justify-content:center;
+  }
+  body.tab-today .fab{display:flex}
+  .fab:hover{background:#fff}
+
+  /* ---- Bottom sheet ---- */
+  .sheet-backdrop{position:fixed;inset:0;background:rgba(30,15,12,.5);z-index:44;opacity:0;pointer-events:none;transition:opacity .2s var(--ease)}
+  .sheet-backdrop.open{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:45;
+    max-width:560px;margin:0 auto;
+    background:var(--card-strong);border:1px solid var(--line);border-bottom:0;
+    border-radius:24px 24px 0 0;
+    padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    transform:translateY(105%);transition:transform .28s var(--ease);
+    box-shadow:var(--shadow-lg);
+  }
+  .sheet.open{transform:none}
+  .sheet-grip{width:40px;height:4px;border-radius:var(--r-pill);background:var(--line-strong);margin:6px auto 14px}
+
+  /* ---- Onboarding (primeiro uso) ---- */
+  .onb-backdrop{position:fixed;inset:0;background:rgba(30,15,12,.58);z-index:70;display:flex;align-items:center;justify-content:center;padding:24px}
+  .onb-card{
+    width:100%;max-width:370px;padding:28px 24px;text-align:center;
+    background:var(--card-strong);border:1px solid var(--line);border-radius:26px;
+    box-shadow:var(--shadow-lg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  }
+  .onb-emoji{font-size:2.8rem;line-height:1;margin-bottom:14px}
+  .onb-card h2{font-size:1.25rem;margin:0 0 8px}
+  .onb-card p{margin:0;line-height:1.6}
+  .onb-dots{display:flex;gap:6px;justify-content:center;margin:20px 0 16px}
+  .onb-dots span{width:8px;height:8px;border-radius:var(--r-pill);background:var(--surface-3);transition:background .2s}
+  .onb-dots span.on{background:var(--primary)}
+
   /* Respeita quem prefere menos movimento */
   @media(prefers-reduced-motion:reduce){
     *{animation-duration:.001ms!important;transition-duration:.001ms!important}
@@ -783,6 +830,56 @@ create policy "allow_all" on rt_states
     <button class="tab" data-tab="report"><span class="tab-ico">📊</span><span class="tab-lbl">Metas</span></button>
     <button class="tab" data-tab="plan"><span class="tab-ico">🗂️</span><span class="tab-lbl">Planejar</span></button>
   </nav>
+
+  <!-- Adição rápida (aba Hoje) -->
+  <button id="fab" class="fab" aria-label="Adicionar atividade rápida" title="Adicionar atividade">＋</button>
+  <div id="quickBackdrop" class="sheet-backdrop"></div>
+  <div id="quickSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Nova atividade rápida">
+    <div class="sheet-grip"></div>
+    <h3 style="margin:0 0 4px">✦ Atividade rápida</h3>
+    <p class="small" style="margin:0 0 14px">Entra no dia selecionado na aba Hoje.</p>
+    <div class="fgrid">
+      <label class="field span2"><span>Título</span>
+        <input id="qaTitle" placeholder="Ex.: Pagar contas"></label>
+      <label class="field"><span>Horário (opcional)</span>
+        <input id="qaTime" type="time"></label>
+      <label class="field"><span>Prioridade</span>
+        <select id="qaPriority">
+          <option value="low">Baixa</option>
+          <option value="medium" selected>Média</option>
+          <option value="high">Alta</option>
+        </select></label>
+    </div>
+    <div class="row" style="margin-top:16px;gap:8px;flex-wrap:nowrap">
+      <button id="qaCancel" class="ghost" style="flex:1">Cancelar</button>
+      <button id="qaSave" class="primary" style="flex:2">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Onboarding — primeiro uso, conta vazia -->
+<div id="onboarding" class="onb-backdrop" style="display:none">
+  <div class="onb-card">
+    <div id="onbStep1">
+      <div class="onb-emoji">🎯</div>
+      <h2>Bem-vindo ao Minha Rotina</h2>
+      <p class="small">Defina <strong>metas mensuráveis</strong> — como "ler 400 páginas" ou "treinar 12x no mês" — e acompanhe o progresso na aba <strong>Metas</strong>.</p>
+    </div>
+    <div id="onbStep2" style="display:none">
+      <div class="onb-emoji">☀️</div>
+      <h2>Seu dia, organizado</h2>
+      <p class="small">Crie <strong>rotinas recorrentes</strong>, eventos e atividades na aba <strong>Planejar</strong>. Marque como Feita na aba <strong>Hoje</strong> — o progresso das metas atualiza sozinho.</p>
+    </div>
+    <div class="onb-dots"><span class="on"></span><span></span></div>
+    <div id="onbNav1">
+      <button id="onbNext" class="primary" style="width:100%">Avançar</button>
+      <button id="onbSkip" class="link" style="margin-top:8px">Pular apresentação</button>
+    </div>
+    <div id="onbNav2" style="display:none">
+      <button id="onbStart" class="primary" style="width:100%">Criar minha primeira meta</button>
+      <button id="onbExplore" class="link" style="margin-top:8px">Explorar por conta própria</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -1257,6 +1354,7 @@ function showApp(){
   renderAll();
   // Hoje é a tela de uso diário — é por ela que o app abre
   show('today');
+  maybeShowOnboarding();
 }
 function showLogin(){
   $('appScreen').style.display = 'none';
@@ -2995,6 +3093,42 @@ function escapeHtml(s){
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+/* ── Sequência (streak): dias consecutivos com pelo menos 1 item "Feita".
+   Se hoje ainda não tem nada feito, conta a partir de ontem — a sequência
+   só quebra quando um dia inteiro passa em branco. ── */
+function streakCount(){
+  const hasDone = ds => {
+    const e = state.entries[ds];
+    return !!e && Object.keys(e).some(k => k.startsWith('s-') && e[k] === 'done');
+  };
+  const d = new Date(); d.setHours(0,0,0,0);
+  if(!hasDone(iso(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while(hasDone(iso(d))){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+/* HTML do resumo do dia ("X de Y concluídas" + streak) — usado no
+   renderToday e atualizado in-place quando o usuário marca um status. */
+function daySummaryHTML(date){
+  const recs = recurringFor(date), tasks = tasksFor(date), evts = eventsFor(date);
+  const total = recs.length + tasks.length;
+  let done = 0;
+  recs.forEach(o => { if(status(date, o.routine.id) === 'done') done++; });
+  tasks.forEach(t => { if(status(date, 'task:' + t.id) === 'done') done++; });
+  const stk = streakCount();
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const label = total
+    ? `${done} de ${total} ${total === 1 ? 'concluída' : 'concluídas'}`
+    : `${evts.length} ${evts.length === 1 ? 'evento' : 'eventos'}`;
+  return `
+    <div class="between">
+      <strong>${label}</strong>
+      ${stk > 0 ? `<span class="streak-badge">🔥 ${stk === 1 ? '1 dia seguido' : stk + ' dias seguidos'}</span>` : ''}
+    </div>
+    ${total ? `<div class="bar" style="margin-top:10px"><div class="fill ${pct >= 100 ? 'full' : ''}" style="width:${pct}%"></div></div>` : ''}`;
+}
+
 function renderToday(){
   const box = $('todayList');
   const date = $('todayDate').value || iso(today);
@@ -3038,6 +3172,12 @@ function renderToday(){
     if(cta) cta.onclick = () => show('plan');
     return;
   }
+
+  // Resumo do dia + sequência
+  const summary = document.createElement('div');
+  summary.className = 'day-summary';
+  summary.innerHTML = daySummaryHTML(date);
+  box.appendChild(summary);
 
   items.forEach(it => {
     if(it.kind === 'rec'){
@@ -3191,6 +3331,9 @@ function renderToday(){
       item.classList.remove('done','missed','canceled');
       if(i.value !== 'pending') item.classList.add(i.value);
     }
+    // Resumo do dia acompanha na hora (sem re-render da lista)
+    const ds = box.querySelector('.day-summary');
+    if(ds) ds.innerHTML = daySummaryHTML(date);
     renderReport();
     stats();
   });
@@ -3686,6 +3829,69 @@ $('setImportFile').onchange = (e) => {
   setTimeout(refreshSettings, 500);
 };
 $('setDeleteAccBtn').onclick = deleteCurrentAccount;
+
+/* ── Adição rápida (FAB na aba Hoje) ── */
+function closeQuickSheet(){
+  $('quickBackdrop').classList.remove('open');
+  $('quickSheet').classList.remove('open');
+}
+$('fab').onclick = () => {
+  $('qaTitle').value = ''; $('qaTime').value = ''; $('qaPriority').value = 'medium';
+  $('quickBackdrop').classList.add('open');
+  $('quickSheet').classList.add('open');
+  setTimeout(() => $('qaTitle').focus(), 180);
+};
+$('quickBackdrop').onclick = closeQuickSheet;
+$('qaCancel').onclick = closeQuickSheet;
+$('qaSave').onclick = () => {
+  const title = $('qaTitle').value.trim();
+  if(!title){ showToast('Dê um título à atividade'); $('qaTitle').focus(); return; }
+  const date = $('todayDate').value || iso(new Date());
+  state.specificDateTasks = state.specificDateTasks || [];
+  state.specificDateTasks.push({
+    id: uuid(), title, date,
+    time: $('qaTime').value, endTime: '',
+    priority: $('qaPriority').value,
+    createdAt: new Date().toISOString()
+  });
+  save();
+  closeQuickSheet();
+  renderToday(); renderWeek(); renderMonth(); renderPlan();
+  showToast('✦ Atividade adicionada');
+};
+$('qaTitle').addEventListener('keydown', e => { if(e.key === 'Enter') $('qaSave').click(); });
+
+/* ── Onboarding: 2 telas no primeiro uso (conta vazia) ── */
+function maybeShowOnboarding(){
+  const u = currentUser();
+  if(!u) return;
+  const KEY = 'rt:onboarded:' + u;
+  if(localStorage.getItem(KEY)) return;
+  const hasData = state.goals.length || state.recurring.length ||
+    (state.specificDateTasks || []).length || state.events.length;
+  if(hasData){ localStorage.setItem(KEY, '1'); return; }
+
+  const el = $('onboarding');
+  let step = 0;
+  const render = () => {
+    $('onbStep1').style.display = step === 0 ? 'block' : 'none';
+    $('onbStep2').style.display = step === 1 ? 'block' : 'none';
+    $('onbNav1').style.display  = step === 0 ? 'block' : 'none';
+    $('onbNav2').style.display  = step === 1 ? 'block' : 'none';
+    [...el.querySelectorAll('.onb-dots span')].forEach((d, i) => d.classList.toggle('on', i === step));
+  };
+  const done = goPlan => {
+    localStorage.setItem(KEY, '1');
+    el.style.display = 'none';
+    if(goPlan) show('plan');
+  };
+  $('onbNext').onclick    = () => { step = 1; render(); };
+  $('onbSkip').onclick    = () => done(false);
+  $('onbStart').onclick   = () => done(true);
+  $('onbExplore').onclick = () => done(false);
+  render();
+  el.style.display = 'flex';
+}
 
 $('syncNowBtn').onclick = async () => {
   if(!hasSupabase()){
