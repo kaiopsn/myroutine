@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Minha Rotina</title>
+<title>Minha Rotina — organize metas, rotinas e eventos</title>
+<meta name="description" content="Organizador pessoal de metas, rotinas e eventos. Acompanhe seu progresso diário, semanal e mensal — funciona offline e seus dados ficam no seu dispositivo.">
   <!-- ══ PWA — Minha Rotina ══ -->
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
-  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <meta name="theme-color" content="#c99286">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,7 +37,7 @@
 
     /* Texto */
     --txt:#fff7f4;
-    --muted:rgba(255,247,244,.72);
+    --muted:rgba(255,247,244,.78);
     --faint:rgba(255,247,244,.5);
 
     /* Ação primária */
@@ -127,6 +128,18 @@
   .title{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:2px 0 0;display:flex;align-items:center;gap:8px}
   .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
   .top-actions button{padding:9px 13px;min-height:40px;font-size:.85rem}
+  .iconbtn-top{width:42px;height:42px;padding:0;font-size:1.05rem;border-radius:var(--r-pill)}
+
+  /* ---- Formulários do Planejamento ---- */
+  .form-hint{margin:2px 0 12px}
+  .fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .fgrid .span2{grid-column:1/-1}
+  .btn-block{width:100%;margin-top:14px}
+  .day-picker{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:6px}
+  .day-picker label{position:relative;display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:10px;background:var(--surface);border:1px solid transparent;cursor:pointer;font-size:.75rem;font-weight:700;user-select:none;transition:background .15s var(--ease)}
+  .day-picker input{position:absolute;opacity:0;pointer-events:none}
+  .day-picker label:has(input:checked){background:var(--primary);color:var(--primary-ink)}
+  .day-picker label:has(input:focus-visible){box-shadow:var(--focus)}
 
   .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
   .layout > main, .layout > aside{min-width:0}
@@ -356,7 +369,6 @@
     .day{min-height:56px}
     .title{font-size:1.35rem}
   }
-  @media(max-width:640px){ #seed{display:none} }
 
   /* Respeita quem prefere menos movimento */
   @media(prefers-reduced-motion:reduce){
@@ -377,7 +389,7 @@
 
     <!-- Aba Login (default) -->
     <div id="loginPanel">
-      <input id="loginUser" placeholder="Nome de usuário" autocomplete="username">
+      <input id="loginUser" placeholder="Nome de usuário" autocomplete="username" autofocus>
       <input id="loginPass" type="password" placeholder="Senha" autocomplete="current-password">
       <div id="loginError" class="login-error" style="display:none"></div>
       <button id="loginBtn" class="primary" style="width:100%">Entrar</button>
@@ -486,12 +498,11 @@ create policy "allow_all" on rt_states
       <div class="title">Minha Rotina <span id="syncDot" class="sync-dot sync-none" title="Sincronização não configurada"></span></div>
     </div>
     <div class="top-actions">
-      <button id="seed" class="ghost">Carregar demo</button>
-      <button id="syncNowBtn" class="ghost" title="Sincronizar agora">☁ Sync</button>
       <button id="installBtn" onclick="triggerInstall()" class="primary" style="display:none;gap:6px;align-items:center">
-        📲 Instalar app
+        📲 Instalar
       </button>
-      <button id="settingsBtn" class="ghost" title="Configurações">⚙ Configurações</button>
+      <button id="syncNowBtn" class="ghost iconbtn-top" title="Sincronizar agora" aria-label="Sincronizar agora">☁</button>
+      <button id="settingsBtn" class="ghost iconbtn-top" title="Configurações" aria-label="Configurações">⚙</button>
     </div>
   </div>
 
@@ -514,134 +525,141 @@ create policy "allow_all" on rt_states
     <!-- ===== Main views ===== -->
     <main>
 
-      <section class="card section view active" id="view-plan">
+      <section class="card section view" id="view-plan">
         <h2>Planejamento</h2>
         <p class="muted">Metas macro, eventos e rotinas recorrentes.</p>
 
         <div class="item">
-          <h3 style="margin:0 0 6px">Nova meta macro</h3>
-          <div class="row">
-            <input id="goalName" placeholder="Ex.: Ler 400 páginas">
-            <select id="goalType">
-              <option value="count">Quantidade</option>
-              <option value="pages">Páginas</option>
-              <option value="tasks">Tarefa</option>
-            </select>
+          <h3 style="margin:0 0 4px">🎯 Nova meta</h3>
+          <p class="small form-hint">Objetivo mensurável que você acompanha ao longo do tempo.</p>
+          <div class="fgrid">
+            <label class="field span2"><span>Nome da meta</span>
+              <input id="goalName" placeholder="Ex.: Ler 400 páginas"></label>
+            <label class="field"><span>Tipo</span>
+              <select id="goalType">
+                <option value="count">Quantidade</option>
+                <option value="pages">Páginas</option>
+                <option value="tasks">Tarefa</option>
+              </select></label>
+            <label class="field"><span>Categoria (opcional)</span>
+              <input id="goalCategory" placeholder="Ex.: Saúde"></label>
+            <label class="field"><span>Valor da meta</span>
+              <input id="goalTarget" type="number" inputmode="numeric" placeholder="Ex.: 400"></label>
+            <label class="field"><span>Unidade</span>
+              <input id="goalUnit" placeholder="Ex.: páginas"></label>
+            <label class="field"><span>Mês do prazo (opcional)</span>
+              <select id="goalMonth">
+                <option value="">Sem mês</option>
+                <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+                <option>Abril</option><option>Maio</option><option>Junho</option>
+                <option>Julho</option><option>Agosto</option><option>Setembro</option>
+                <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+              </select></label>
+            <label class="field"><span>Ano</span>
+              <input id="goalYear" type="number" inputmode="numeric" placeholder="2026"></label>
+            <label class="field span2"><span>Ou data exata do prazo (substitui mês/ano)</span>
+              <input id="goalDeadline" type="date"></label>
+            <label class="field span2"><span>Como registrar o progresso</span>
+              <select id="goalEntryMode">
+                <option value="sum">Acumular (soma os lançamentos)</option>
+                <option value="snapshot">Valor atual (peso, medidas — substitui)</option>
+              </select></label>
+            <label class="field span2" id="snapshotStartRow" style="display:none"><span>Valor inicial</span>
+              <input id="goalStartValue" type="number" inputmode="decimal" placeholder="Ex.: 88"></label>
           </div>
-          <div class="row" style="margin-top:8px">
-            <input id="goalTarget" type="number" placeholder="Meta">
-            <input id="goalUnit" placeholder="Unidade">
-          </div>
-          <div class="row" style="margin-top:8px">
-            <select id="goalMonth">
-              <option value="">Mês (opcional)</option>
-              <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
-              <option>Abril</option><option>Maio</option><option>Junho</option>
-              <option>Julho</option><option>Agosto</option><option>Setembro</option>
-              <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
-            </select>
-            <input id="goalYear" type="number" placeholder="Ano" style="max-width:100px">
-          </div>
-          <div class="row" style="margin-top:8px">
-            <input id="goalDeadline" type="date" placeholder="Data de vencimento" style="flex:1">
-            <span class="small" style="opacity:.6;align-self:center">📅 Data exata (substitui mês/ano)</span>
-          </div>
-          <div class="row" style="margin-top:8px">
-            <select id="goalEntryMode">
-              <option value="sum">Acumular (soma os lançamentos)</option>
-              <option value="snapshot">Valor atual (peso, medidas — substitui)</option>
-            </select>
-          </div>
-          <div class="row" id="snapshotStartRow" style="margin-top:8px;display:none">
-            <input id="goalStartValue" type="number" placeholder="Valor inicial (ex.: peso atual)">
-          </div>
-          <div class="row" style="margin-top:8px">
-            <button id="addGoal" class="primary">Adicionar meta</button>
-          </div>
+          <button id="addGoal" class="primary btn-block">Adicionar meta</button>
         </div>
 
         <div class="item" style="margin-top:12px">
-          <h3 style="margin:0 0 6px">▶ Evento com data</h3>
-          <div class="row">
-            <input id="eventTitle" placeholder="Ex.: Viagem para RN">
-            <input id="eventDate" type="date">
+          <h3 style="margin:0 0 4px">📌 Evento com data</h3>
+          <p class="small form-hint">Compromisso pontual que aparece no calendário.</p>
+          <div class="fgrid">
+            <label class="field span2"><span>Título</span>
+              <input id="eventTitle" placeholder="Ex.: Consulta médica"></label>
+            <label class="field span2"><span>Data</span>
+              <input id="eventDate" type="date"></label>
+            <label class="field"><span>Início (opcional)</span>
+              <input id="eventTime" type="time"></label>
+            <label class="field"><span>Término (opcional)</span>
+              <input id="eventEndTime" type="time"></label>
+            <label class="field span2"><span>Prioridade</span>
+              <select id="eventPriority">
+                <option value="low">Baixa</option>
+                <option value="medium" selected>Média</option>
+                <option value="high">Alta</option>
+              </select></label>
           </div>
-          <div class="row" style="margin-top:8px">
-            <input id="eventTime" type="time" placeholder="Início">
-            <input id="eventEndTime" type="time" placeholder="Término">
-            <select id="eventPriority">
-              <option value="low">Prioridade baixa</option>
-              <option value="medium" selected>Prioridade média</option>
-              <option value="high">Prioridade alta</option>
-            </select>
-          </div>
-          <div class="row" style="margin-top:8px">
-            <button id="addEvent" class="primary">Adicionar ao calendário</button>
-          </div>
-        </div>
-
-        <div class="item" style="margin-top:12px;border-left:4px solid rgba(242,210,156,.6)">
-          <h3 style="margin:0 0 6px">✦ Atividade única</h3>
-          <p class="small" style="margin:0 0 10px;color:rgba(255,247,244,.65)">Tarefa específica de um dia — não se repete. Você pode acompanhar conclusão.</p>
-          <div class="row">
-            <input id="taskTitle" placeholder="Ex.: Fazer compras">
-            <input id="taskDate" type="date">
-          </div>
-          <div class="row" style="margin-top:8px">
-            <input id="taskTime" type="time" placeholder="Início">
-            <input id="taskEndTime" type="time" placeholder="Término">
-            <select id="taskPriority">
-              <option value="low">Prioridade baixa</option>
-              <option value="medium" selected>Prioridade média</option>
-              <option value="high">Prioridade alta</option>
-            </select>
-          </div>
-          <div class="row" style="margin-top:8px">
-            <button id="addTask" class="primary">Adicionar atividade</button>
-          </div>
+          <button id="addEvent" class="primary btn-block">Adicionar evento</button>
         </div>
 
         <div class="item" style="margin-top:12px">
-          <h3 style="margin:0 0 6px">↻ Rotina recorrente</h3>
-          <input id="recTitle" placeholder="Ex.: Aula do mestrado" style="margin-bottom:8px">
-          <div class="row">
-            <input id="recStart" type="time">
-            <input id="recEnd" type="time">
-            <select id="recGoal"><option value="">Vincular à meta macro</option></select>
-            <select id="recPriority">
-              <option value="low">Prioridade baixa</option>
-              <option value="medium" selected>Prioridade média</option>
-              <option value="high">Prioridade alta</option>
-            </select>
+          <h3 style="margin:0 0 4px">✦ Atividade única</h3>
+          <p class="small form-hint">Tarefa de um dia específico — não se repete.</p>
+          <div class="fgrid">
+            <label class="field span2"><span>Título</span>
+              <input id="taskTitle" placeholder="Ex.: Fazer compras"></label>
+            <label class="field span2"><span>Data</span>
+              <input id="taskDate" type="date"></label>
+            <label class="field"><span>Início (opcional)</span>
+              <input id="taskTime" type="time"></label>
+            <label class="field"><span>Término (opcional)</span>
+              <input id="taskEndTime" type="time"></label>
+            <label class="field span2"><span>Prioridade</span>
+              <select id="taskPriority">
+                <option value="low">Baixa</option>
+                <option value="medium" selected>Média</option>
+                <option value="high">Alta</option>
+              </select></label>
           </div>
-          <div class="row" style="margin-top:8px">
-            <span class="small">Dias:</span>
-            <label class="small"><input type="checkbox" class="rec-day" value="1" checked> Seg</label>
-            <label class="small"><input type="checkbox" class="rec-day" value="2" checked> Ter</label>
-            <label class="small"><input type="checkbox" class="rec-day" value="3" checked> Qua</label>
-            <label class="small"><input type="checkbox" class="rec-day" value="4" checked> Qui</label>
-            <label class="small"><input type="checkbox" class="rec-day" value="5" checked> Sex</label>
-            <label class="small"><input type="checkbox" class="rec-day" value="6"> Sáb</label>
-            <label class="small"><input type="checkbox" class="rec-day" value="0"> Dom</label>
+          <button id="addTask" class="primary btn-block">Adicionar atividade</button>
+        </div>
+
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 4px">🔁 Rotina recorrente</h3>
+          <p class="small form-hint">Repete nos dias escolhidos, com controle de presença.</p>
+          <div class="fgrid">
+            <label class="field span2"><span>Título</span>
+              <input id="recTitle" placeholder="Ex.: Treino de muay thai"></label>
+            <label class="field"><span>Início</span>
+              <input id="recStart" type="time"></label>
+            <label class="field"><span>Término</span>
+              <input id="recEnd" type="time"></label>
+            <label class="field"><span>Vincular à meta (opcional)</span>
+              <select id="recGoal"><option value="">Sem vínculo</option></select></label>
+            <label class="field"><span>Prioridade</span>
+              <select id="recPriority">
+                <option value="low">Baixa</option>
+                <option value="medium" selected>Média</option>
+                <option value="high">Alta</option>
+              </select></label>
           </div>
-          <div class="row" style="margin-top:8px">
-            <button id="addRec" class="primary">Adicionar rotina</button>
+          <div class="field" style="margin-top:10px"><span style="font-weight:700;font-size:.78rem;color:var(--muted)">Dias da semana</span>
+            <div class="day-picker">
+              <label><input type="checkbox" class="rec-day" value="1" checked>Seg</label>
+              <label><input type="checkbox" class="rec-day" value="2" checked>Ter</label>
+              <label><input type="checkbox" class="rec-day" value="3" checked>Qua</label>
+              <label><input type="checkbox" class="rec-day" value="4" checked>Qui</label>
+              <label><input type="checkbox" class="rec-day" value="5" checked>Sex</label>
+              <label><input type="checkbox" class="rec-day" value="6">Sáb</label>
+              <label><input type="checkbox" class="rec-day" value="0">Dom</label>
+            </div>
           </div>
+          <button id="addRec" class="primary btn-block">Adicionar rotina</button>
         </div>
 
         <div class="list" id="planList" style="margin-top:12px"></div>
       </section>
 
-      <section class="card section view" id="view-today">
+      <section class="card section view active" id="view-today">
         <h2>Hoje</h2>
         <p class="muted">Rotinas recorrentes, eventos e atividades únicas do dia. Metas macro não aparecem aqui.</p>
-        <div style="display:flex;align-items:center;gap:8px;margin:10px 0 14px;flex-wrap:wrap">
-          <button id="todayPrev" class="ghost" style="padding:8px 12px;font-size:.85rem">◀</button>
-          <input id="todayDate" type="date" style="max-width:180px">
-          <button id="todayNow" class="ghost" style="padding:8px 12px;font-size:.85rem">Hoje</button>
-          <button id="todayNext" class="ghost" style="padding:8px 12px;font-size:.85rem">▶</button>
-          <span id="todayDow" class="small" style="opacity:.75;font-style:italic"></span>
+        <div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px">
+          <button id="todayPrev" class="ghost" style="padding:8px 12px;font-size:.85rem;flex-shrink:0" aria-label="Dia anterior">◀</button>
+          <input id="todayDate" type="date" style="flex:1;min-width:0" aria-label="Data selecionada">
+          <button id="todayNext" class="ghost" style="padding:8px 12px;font-size:.85rem;flex-shrink:0" aria-label="Próximo dia">▶</button>
+          <button id="todayNow" class="ghost" style="padding:8px 12px;font-size:.85rem;flex-shrink:0">Hoje</button>
         </div>
+        <div id="todayDow" class="small" style="margin:0 0 14px;opacity:.85"></div>
         <div class="list" id="todayList"></div>
       </section>
 
@@ -649,9 +667,9 @@ create policy "allow_all" on rt_states
         <h2>Semana</h2>
         <p class="muted">Visão da semana dividida em manhã, tarde e noite.</p>
         <div class="row" style="justify-content:space-between;margin:10px 0 12px">
-          <button id="prevWeek">◀</button>
+          <button id="prevWeek" aria-label="Semana anterior">◀</button>
           <div id="weekTitle" class="label"></div>
-          <button id="nextWeek">▶</button>
+          <button id="nextWeek" aria-label="Próxima semana">▶</button>
         </div>
         <div class="week-grid" id="weekList"></div>
       </section>
@@ -659,9 +677,9 @@ create policy "allow_all" on rt_states
       <section class="card section view" id="view-month">
         <h2>Mês</h2>
         <div class="row" style="justify-content:space-between">
-          <button id="prevMonth">◀</button>
+          <button id="prevMonth" aria-label="Mês anterior">◀</button>
           <div id="monthTitle" class="label"></div>
-          <button id="nextMonth">▶</button>
+          <button id="nextMonth" aria-label="Próximo mês">▶</button>
         </div>
         <div class="calendar" id="calendar" style="margin-top:12px"></div>
       </section>
@@ -738,22 +756,32 @@ create policy "allow_all" on rt_states
           <div id="setImportName" class="small" style="margin-top:6px"></div>
         </div>
 
+        <div class="item" style="margin-top:12px">
+          <h3 style="margin:0 0 6px">🧪 Dados de exemplo</h3>
+          <p class="small" style="margin:0 0 10px">Preencha o app com dados fictícios para conhecer os recursos. Substitui o conteúdo atual da conta.</p>
+          <button id="seed" class="ghost">Carregar dados de exemplo</button>
+        </div>
+
         <div class="item" style="margin-top:12px;background:rgba(231,170,170,.12);border-color:rgba(231,170,170,.3)">
           <h3 style="margin:0 0 6px;color:#f0c5c5">⚠ Zona de perigo</h3>
           <p class="small" style="margin:0 0 10px">Apagar a conta remove permanentemente todos os dados deste usuário no dispositivo. Faça backup antes.</p>
           <button id="setDeleteAccBtn" class="danger">Apagar conta deste dispositivo</button>
         </div>
+
+        <p class="small" style="margin:18px 0 0;text-align:center;opacity:.65">
+          Minha Rotina · seus dados ficam no seu dispositivo
+        </p>
       </section>
 
     </main>
   </div>
 
-  <nav class="tabs">
-    <button class="tab active" data-tab="plan"><span class="tab-ico">🗂️</span><span class="tab-lbl">Plano</span></button>
-    <button class="tab" data-tab="today"><span class="tab-ico">☀️</span><span class="tab-lbl">Hoje</span></button>
+  <nav class="tabs" aria-label="Navegação principal">
+    <button class="tab active" data-tab="today"><span class="tab-ico">☀️</span><span class="tab-lbl">Hoje</span></button>
     <button class="tab" data-tab="week"><span class="tab-ico">🗓️</span><span class="tab-lbl">Semana</span></button>
     <button class="tab" data-tab="month"><span class="tab-ico">📅</span><span class="tab-lbl">Mês</span></button>
     <button class="tab" data-tab="report"><span class="tab-ico">📊</span><span class="tab-lbl">Metas</span></button>
+    <button class="tab" data-tab="plan"><span class="tab-ico">🗂️</span><span class="tab-lbl">Planejar</span></button>
   </nav>
 </div>
 
@@ -1226,13 +1254,9 @@ function showApp(){
   $('loginScreen').style.display = 'none';
   $('appScreen').style.display = 'block';
   $('welcomeUser').textContent = 'Olá, ' + currentUser();
-  document.body.classList.remove('tab-today','tab-week','tab-month','tab-report','tab-settings');
-  document.body.classList.add('tab-plan');
-  // Garante que a view ativa seja Planejamento ao entrar
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  $('view-plan').classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'plan'));
   renderAll();
+  // Hoje é a tela de uso diário — é por ela que o app abre
+  show('today');
 }
 function showLogin(){
   $('appScreen').style.display = 'none';
@@ -1858,15 +1882,18 @@ function addGoal(){
   const type = $('goalType').value;
   const target = Number($('goalTarget').value);
   const unit = $('goalUnit').value.trim() || 'itens';
+  const category = ($('goalCategory') ? $('goalCategory').value : '').trim();
   const entryMode = $('goalEntryMode').value || 'sum';
   const startValue = entryMode === 'snapshot' ? Number($('goalStartValue').value) : null;
   const month = $('goalMonth').value || '';
   const year = Number($('goalYear').value) || new Date().getFullYear();
   const deadline = $('goalDeadline').value || '';
-  if(!name || !Number.isFinite(target)) return;
+  if(!name){ showToast('Dê um nome para a meta'); $('goalName').focus(); return; }
+  if(!Number.isFinite(target) || target <= 0){
+    showToast('Informe o valor da meta (ex.: 400)'); $('goalTarget').focus(); return;
+  }
   if(entryMode === 'snapshot' && !Number.isFinite(startValue)){
-    showToast('⚠ Informe o valor inicial para esse tipo de meta.');
-    return;
+    showToast('Informe o valor inicial para esse tipo de meta'); $('goalStartValue').focus(); return;
   }
   // Se houver deadline específico, deriva month/year dele para compatibilidade
   let finalMonth = month || null;
@@ -1881,6 +1908,7 @@ function addGoal(){
   const now = new Date().toISOString();
   state.goals.push({
     id: uuid(), name, type, target, unit,
+    category: category || null,
     month: finalMonth, year: finalYear,
     deadline: deadline || null,
     baseline: 0, status: 'active', source: 'manual',
@@ -1889,6 +1917,7 @@ function addGoal(){
     createdAt: now, updatedAt: now
   });
   $('goalName').value = ''; $('goalTarget').value = ''; $('goalUnit').value = '';
+  if($('goalCategory')) $('goalCategory').value = '';
   $('goalMonth').value = ''; $('goalYear').value = '';
   $('goalDeadline').value = '';
   $('goalStartValue').value = ''; $('goalEntryMode').value = 'sum';
@@ -1904,7 +1933,8 @@ function addEvent(){
   const time = $('eventTime').value;
   const endTime = $('eventEndTime').value;
   const priority = $('eventPriority').value;
-  if(!title || !date) return;
+  if(!title){ showToast('Dê um título ao evento'); $('eventTitle').focus(); return; }
+  if(!date){ showToast('Escolha a data do evento'); $('eventDate').focus(); return; }
   state.events.push({ id: uuid(), title, date, time, endTime, priority });
   $('eventTitle').value = ''; $('eventTime').value = ''; $('eventEndTime').value = '';
   $('eventDate').value = '';
@@ -1921,8 +1951,9 @@ function addTask(){
   const time = $('taskTime').value || '';
   const endTime = $('taskEndTime').value || '';
   const priority = $('taskPriority').value;
-  if(!title || !date) return;
-  state.specificDateTasks.push({ 
+  if(!title){ showToast('Dê um título à atividade'); $('taskTitle').focus(); return; }
+  if(!date){ showToast('Escolha a data da atividade'); $('taskDate').focus(); return; }
+  state.specificDateTasks.push({
     id: uuid(), title, date, time, endTime, priority, createdAt: new Date().toISOString()
   });
   $('taskTitle').value = ''; $('taskDate').value = ''; $('taskTime').value = '';
@@ -1969,7 +2000,8 @@ function addRec(){
   const goalId = $('recGoal').value || '';
   const priority = $('recPriority').value;
   const days = [...document.querySelectorAll('.rec-day:checked')].map(x => Number(x.value));
-  if(!title || !days.length) return;
+  if(!title){ showToast('Dê um título à rotina'); $('recTitle').focus(); return; }
+  if(!days.length){ showToast('Selecione pelo menos um dia da semana'); return; }
   const schedule = [{ days, start, end }];
   if(conflict(schedule)){ showToast('⚠ Conflito de horário com outra rotina nesse dia.'); return; }
   state.recurring.push({
@@ -2340,7 +2372,7 @@ function updateBackupStatus(){
   if(days >= 7){
     el.innerHTML = '<span style="color:#f7c887">⚠ Seu último backup foi há ' + days + ' dias. Considere fazer um novo.</span>';
   } else {
-    el.textContent = 'Último backup: há ' + (days === 0 ? 'menos de 1 dia' : (days + ' dia(s)')) + '.';
+    el.textContent = 'Último backup: há ' + (days === 0 ? 'menos de 1 dia' : (days === 1 ? '1 dia' : days + ' dias')) + '.';
   }
 }
 
@@ -2566,7 +2598,7 @@ function renderPlan(){
   // Dropdown "Vincular à meta macro" — mesmas regras de filtragem das séries
   // (mostrar só mês corrente para repetidas) + esconde arquivadas.
   const goalsForSelect = visibleGoals.filter(g => g.status !== 'archived');
-  $('recGoal').innerHTML = '<option value="">Vincular à meta macro</option>' +
+  $('recGoal').innerHTML = '<option value="">Sem vínculo</option>' +
     goalsForSelect.map(g => {
       const tag = g.month ? ' · ' + g.month : '';
       return `<option value="${g.id}">${escapeHtml(g.name + tag)}</option>`;
@@ -2856,7 +2888,7 @@ function renderGoalCard(g, opts){
     const dl = daysUntilDeadline(g);
     return `
       <div class="small" style="margin-top:8px">
-        <span class="risk-badge">⏰ faltam ${dl} dia(s), você está em ${p.percent}%</span>
+        <span class="risk-badge">⏰ ${dl === 1 ? 'falta 1 dia' : 'faltam ' + dl + ' dias'}, você está em ${p.percent}%</span>
       </div>`;
   })() : '';
 
@@ -2895,8 +2927,8 @@ function renderGoalCard(g, opts){
         <div class="between" style="gap:8px">
           <span class="${badgeCls}">${badgeText}</span>
           <span class="row" style="flex-shrink:0;gap:6px">
-            <button class="iconbtn" data-edit-goal="${g.id}" title="editar">✎</button>
-            <button class="iconbtn" data-del-goal="${g.id}" title="apagar">×</button>
+            <button class="iconbtn" data-edit-goal="${g.id}" title="Editar meta" aria-label="Editar meta">✎</button>
+            <button class="iconbtn" data-del-goal="${g.id}" title="Apagar meta" aria-label="Apagar meta">×</button>
           </span>
         </div>
         <strong style="display:block;margin-top:8px">${escapeHtml(g.name)}</strong>
@@ -2911,7 +2943,7 @@ function renderGoalCard(g, opts){
     <div class="bar" style="margin-top:10px"><div class="fill ${fillCls}" style="width:${p.percent}%"></div></div>
     <div class="small" style="margin-top:6px">
       ${isSnapshot ? 'Valor atual (substitui a cada registro)' :
-        (hasLinked ? p.linkedCount + ' rotina(s) vinculada(s)' : 'Sem rotina vinculada — registre progresso manual')}
+        (hasLinked ? p.linkedCount + (p.linkedCount === 1 ? ' rotina vinculada' : ' rotinas vinculadas') : 'Sem rotina vinculada — registre progresso manual')}
       ${g.baseline ? ' · baseline ' + g.baseline : ''}
     </div>
 
@@ -2996,10 +3028,14 @@ function renderToday(){
     .sort((a,b) => a.time.localeCompare(b.time));
 
   if(!items.length){
-    box.innerHTML = `<div class="item muted" style="text-align:center;padding:28px 16px;line-height:1.8">
-      🌿<br><strong style="color:var(--txt);opacity:.8">Nenhuma atividade neste dia</strong><br>
-      <span style="font-size:.82rem">Use o Planejamento para adicionar rotinas,<br>eventos ou atividades únicas.</span>
+    box.innerHTML = `<div class="item" style="text-align:center;padding:32px 16px">
+      <div style="font-size:2rem;line-height:1;margin-bottom:10px">🌿</div>
+      <strong style="display:block;margin-bottom:4px">Dia livre</strong>
+      <span class="small" style="display:block;margin-bottom:14px">Nenhuma rotina, evento ou atividade para esta data.</span>
+      <button class="primary" data-goto-plan style="margin:0 auto">＋ Planejar este dia</button>
     </div>`;
+    const cta = box.querySelector('[data-goto-plan]');
+    if(cta) cta.onclick = () => show('plan');
     return;
   }
 
@@ -3039,7 +3075,7 @@ function renderToday(){
           </div>
           <div class="row">
             <span class="pbad p-${r.priority || 'medium'}">${prioPt(r.priority || 'medium')}</span>
-            <button class="iconbtn" data-edit-time="${r.id}" title="editar horário">⏱</button>
+            <button class="iconbtn" data-edit-time="${r.id}" title="Editar horário" aria-label="Editar horário">⏱</button>
           </div>
         </div>
         <div class="row" style="margin-top:10px">
@@ -3070,8 +3106,8 @@ function renderToday(){
           </div>
           <div class="row" style="gap:4px">
             <span class="label">Evento</span>
-            <button class="iconbtn" data-edit-ev="${e.id}" title="editar">✏️</button>
-            <button class="iconbtn" data-del-ev="${e.id}" title="excluir" style="color:#c44536">🗑</button>
+            <button class="iconbtn" data-edit-ev="${e.id}" title="Editar evento" aria-label="Editar evento">✏️</button>
+            <button class="iconbtn" data-del-ev="${e.id}" title="Excluir evento" aria-label="Excluir evento">🗑</button>
           </div>
         </div>
         <div class="time-edit" data-ev-edit="${e.id}" style="display:none;flex-direction:column;gap:8px;margin-top:10px">
@@ -3107,8 +3143,8 @@ function renderToday(){
           </div>
           <div class="row" style="gap:4px">
             <span class="pbad p-${t.priority || 'medium'}">${prioPt(t.priority || 'medium')}</span>
-            <button class="iconbtn" data-edit-task="${t.id}" title="editar">✏️</button>
-            <button class="iconbtn" data-del-task="${t.id}" title="excluir" style="color:#c44536">🗑</button>
+            <button class="iconbtn" data-edit-task="${t.id}" title="Editar atividade" aria-label="Editar atividade">✏️</button>
+            <button class="iconbtn" data-del-task="${t.id}" title="Excluir atividade" aria-label="Excluir atividade">🗑</button>
           </div>
         </div>
         <div class="row" style="margin-top:10px">
@@ -3365,7 +3401,14 @@ function renderReport(){
   const box = $('reportList');
   box.innerHTML = '';
   if(!state.goals.length){
-    box.innerHTML = '<div class="item muted">Cadastre metas (ou importe sua planilha) para ter um relatório consolidado.</div>';
+    box.innerHTML = `<div class="item" style="text-align:center;padding:32px 16px">
+      <div style="font-size:2rem;line-height:1;margin-bottom:10px">🎯</div>
+      <strong style="display:block;margin-bottom:4px">Nenhuma meta ainda</strong>
+      <span class="small" style="display:block;margin-bottom:14px">Crie sua primeira meta para acompanhar o progresso aqui.</span>
+      <button class="primary" data-goto-plan style="margin:0 auto">＋ Criar minha primeira meta</button>
+    </div>`;
+    const cta = box.querySelector('[data-goto-plan]');
+    if(cta) cta.onclick = () => show('plan');
     return;
   }
 
@@ -3434,7 +3477,7 @@ function renderReport(){
     const head = document.createElement('div');
     head.className = 'month-head';
     head.innerHTML = `<h3>${escapeHtml(label)}</h3>
-      <span class="count">${goals.length} meta(s)${summary.length ? ' · ' + summary.join(' · ') : ''}</span>`;
+      <span class="count">${goals.length} ${goals.length === 1 ? 'meta' : 'metas'}${summary.length ? ' · ' + summary.join(' · ') : ''}</span>`;
     box.appendChild(head);
 
     for(const goal of goals){
@@ -3586,7 +3629,7 @@ function refreshSettings(){
     if(days >= 7){
       el.innerHTML = '<span style="color:#f7c887">⚠ Último backup há ' + days + ' dias.</span>';
     } else {
-      el.textContent = 'Último backup: ' + (days === 0 ? 'há menos de 1 dia' : 'há ' + days + ' dia(s)') + '.';
+      el.textContent = 'Último backup: ' + (days === 0 ? 'há menos de 1 dia' : (days === 1 ? 'há 1 dia' : 'há ' + days + ' dias')) + '.';
     }
   }
 }

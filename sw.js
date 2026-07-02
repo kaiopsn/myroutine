@@ -13,7 +13,7 @@
    Todos os caminhos são RELATIVOS (./) para funcionar tanto na
    raiz do domínio quanto em subpasta de projeto do GitHub Pages.
    ============================================================ */
-const CACHE = 'minha-rotina-v9';
+const CACHE = 'minha-rotina-v10';
 
 // Precache do essencial (tolerante a falhas individuais)
 const PRECACHE = [
@@ -21,7 +21,10 @@ const PRECACHE = [
   './index.html',
   './manifest.webmanifest',
   './icon.svg',
-  './icon-maskable.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
+  './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', e => {
