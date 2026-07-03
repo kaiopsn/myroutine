@@ -5,6 +5,8 @@ que funciona offline e guarda os dados no próprio dispositivo, separados por co
 
 Feito em um único `index.html` (sem build, sem framework). Redesenhado mobile-first.
 
+_Deploy: GitHub Pages (branch `main`, raiz)._
+
 ## ✨ Recursos
 
 - **Planejamento** — metas macro (quantidade, páginas, tarefa), eventos com data,
