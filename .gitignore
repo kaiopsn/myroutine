@@ -18,3 +18,7 @@ node_modules/
 
 # Config local de ferramentas
 .claude/
+
+# Artefatos de captura de tela (Playwright/preview)
+.playwright-mcp/
+/*.jpeg

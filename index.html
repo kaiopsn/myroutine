@@ -15,16 +15,28 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Minha Rotina">
   <meta name="application-name" content="Minha Rotina">
+  <!-- Tipografia de display: Fraunces (serifa ótica, quente). Degrada para
+       Georgia/serif se offline no primeiro acesso. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap">
 <style>
   /* ============================================================
      Minha Rotina — Design System (redesign mobile-first, 2026)
      Mantém os nomes de classe usados pelo JS e reestiliza tudo.
      ============================================================ */
   :root{
-    /* Marca / fundo quente */
+    /* Tipografia */
+    --font-display:'Fraunces','Georgia','Times New Roman',serif;
+    --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+
+    /* Marca / fundo quente — "amanhecer": brilho quente no topo que decai
+       para a argila profunda embaixo (fonte de luz intencional). */
     --bg:#c99286;
     --bg-2:#d6a99c;
-    --bg-grad:radial-gradient(125% 85% at 50% -10%, #e0b1a4 0%, #c99286 52%, #b47a6d 100%);
+    --bg-grad:
+      radial-gradient(135% 65% at 50% -22%, rgba(245,212,197,.72) 0%, rgba(245,212,197,0) 52%),
+      radial-gradient(120% 92% at 50% 2%, #cf978a 0%, #c1867a 46%, #a66c5e 100%);
 
     /* Superfícies (vidro sobre o fundo) */
     --card:rgba(72,46,42,.5);
@@ -65,18 +77,38 @@
   html{-webkit-text-size-adjust:100%}
   body{
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    font-family:var(--font-body);
     background:var(--bg) var(--bg-grad) fixed;
     color:var(--txt);
     min-height:100vh;min-height:100dvh;
     font-size:16px;line-height:1.45;
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   }
-  h1,h2,h3{line-height:1.2;letter-spacing:-.01em}
-  h2{font-size:1.3rem;margin:0 0 4px;font-weight:800}
+  /* Grão de argila/papel: textura tátil sutil sobre o fundo, para a cor
+     quente ler como material e não como gradiente digital chapado. */
+  body::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    opacity:.3;mix-blend-mode:soft-light;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  #loginScreen, #appScreen{position:relative;z-index:1}
+  h1,h2,h3{line-height:1.15;letter-spacing:-.01em}
+  h2{font-family:var(--font-display);font-size:1.5rem;margin:0 0 4px;font-weight:500;letter-spacing:-.02em}
   h3{font-size:1rem;font-weight:700}
   a{color:#ffe3d9}
   ::selection{background:rgba(255,255,255,.28)}
+  /* Numerais de display — o "coração quantificado" do app em Fraunces,
+     com figuras tabulares para alinhar. */
+  .num{font-family:var(--font-display);font-variant-numeric:tabular-nums;letter-spacing:-.01em;font-feature-settings:'ss01'}
+  .title{font-family:var(--font-display);font-weight:600;letter-spacing:-.02em}
+  .login-card h1{font-family:var(--font-display);font-weight:500;letter-spacing:-.02em}
+  /* Números de destaque em Fraunces tabular */
+  #mGoals,#mDays,#mEvents,#mProgress,.snapshot-current .val{
+    font-family:var(--font-display);font-variant-numeric:tabular-nums;letter-spacing:-.015em;
+  }
+  .day-summary strong{font-family:var(--font-display);font-weight:500;font-size:1.2rem;letter-spacing:-.01em}
+  .streak-badge{font-variant-numeric:tabular-nums}
+  .month-head h3{font-family:var(--font-display);font-weight:500}
 
   /* ---- Campos de formulário ---- */
   button,input,select,textarea{font:inherit}
@@ -247,7 +279,7 @@
 
   /* barra de progresso */
   .bar{height:12px;border-radius:var(--r-pill);background:rgba(0,0,0,.18);overflow:hidden}
-  .fill{height:100%;border-radius:var(--r-pill);background:linear-gradient(90deg,rgba(255,255,255,.6),#fff);transition:width .5s var(--ease)}
+  .fill{height:100%;border-radius:var(--r-pill);background:linear-gradient(90deg,#f0c9a6,#ffeede);transition:width .5s var(--ease)}
   .fill.full{background:linear-gradient(90deg,#9fd4a8,#cdebd1)}
   .fill.failed{background:linear-gradient(90deg,#e79a9a,#f0c5c5)}
 

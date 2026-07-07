@@ -13,7 +13,7 @@
    Todos os caminhos são RELATIVOS (./) para funcionar tanto na
    raiz do domínio quanto em subpasta de projeto do GitHub Pages.
    ============================================================ */
-const CACHE = 'minha-rotina-v11';
+const CACHE = 'minha-rotina-v12';
 
 // Precache do essencial (tolerante a falhas individuais)
 const PRECACHE = [
@@ -49,9 +49,27 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
 
-  // Requisições externas (CDN xlsx etc.) passam direto pela rede
+  // Requisições externas: fontes do Google (Fraunces) são cacheadas
+  // (cache-first) para o app manter a tipografia offline; demais externas
+  // (CDN xlsx etc.) passam direto pela rede.
   if (!req.url.startsWith(self.location.origin)) {
-    e.respondWith(fetch(req).catch(() => new Response('', { status: 408 })));
+    const isFont = /fonts\.(googleapis|gstatic)\.com/.test(req.url);
+    if (isFont) {
+      e.respondWith(
+        caches.match(req).then(cached => {
+          if (cached) return cached;
+          return fetch(req).then(res => {
+            if (res && (res.ok || res.type === 'opaque')) {
+              const clone = res.clone();
+              caches.open(CACHE).then(c => c.put(req, clone));
+            }
+            return res;
+          }).catch(() => new Response('', { status: 408 }));
+        })
+      );
+    } else {
+      e.respondWith(fetch(req).catch(() => new Response('', { status: 408 })));
+    }
     return;
   }
 
