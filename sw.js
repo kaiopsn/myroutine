@@ -13,7 +13,7 @@
    Todos os caminhos são RELATIVOS (./) para funcionar tanto na
    raiz do domínio quanto em subpasta de projeto do GitHub Pages.
    ============================================================ */
-const CACHE = 'minha-rotina-v10';
+const CACHE = 'minha-rotina-v11';
 
 // Precache do essencial (tolerante a falhas individuais)
 const PRECACHE = [
