@@ -34,9 +34,7 @@
        para a argila profunda embaixo (fonte de luz intencional). */
     --bg:#c99286;
     --bg-2:#d6a99c;
-    --bg-grad:
-      radial-gradient(135% 65% at 50% -22%, rgba(245,212,197,.72) 0%, rgba(245,212,197,0) 52%),
-      radial-gradient(120% 92% at 50% 2%, #cf978a 0%, #c1867a 46%, #a66c5e 100%);
+    --bg-grad:radial-gradient(125% 85% at 50% -10%, #e0b1a4 0%, #c99286 52%, #b47a6d 100%);
 
     /* Superfícies (vidro sobre o fundo) */
     --card:rgba(72,46,42,.5);
@@ -88,7 +86,7 @@
      quente ler como material e não como gradiente digital chapado. */
   body::before{
     content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    opacity:.3;mix-blend-mode:soft-light;
+    opacity:.12;mix-blend-mode:soft-light;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   #loginScreen, #appScreen{position:relative;z-index:1}
@@ -250,15 +248,15 @@
      entre navegadores, em vez de depender do render nativo do SO). */
   .item input[type=radio]{
     appearance:none;-webkit-appearance:none;
-    width:20px;height:20px;min-width:20px;margin:0;flex-shrink:0;
-    border-radius:50%;border:2px solid rgba(255,255,255,.6);
+    width:16px;height:16px;min-width:16px;margin:0;flex-shrink:0;
+    border-radius:50%;border:1.5px solid rgba(255,255,255,.6);
     background:transparent;position:relative;cursor:pointer;
     transition:border-color .15s var(--ease);
   }
   .item input[type=radio]:checked{border-color:#fff}
   .item input[type=radio]:checked::after{
     content:'';position:absolute;top:50%;left:50%;
-    width:10px;height:10px;border-radius:50%;background:#fff;
+    width:7px;height:7px;border-radius:50%;background:#fff;
     transform:translate(-50%,-50%);
   }
   .item input[type=radio]:focus-visible{outline:none;box-shadow:var(--focus)}
